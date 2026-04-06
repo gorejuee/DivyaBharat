@@ -1,11 +1,12 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const sequelize = require('@server/config/database');
 
 const User = sequelize.define('User', {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
-    autoIncrement: true
+    allowNull: false
   },
   name: {
     type: DataTypes.STRING,
@@ -22,7 +23,8 @@ const User = sequelize.define('User', {
   }
 }, {
   tableName: 'users',
-  timestamps: true
+  timestamps: true,
+  underscored: true
 });
 
 module.exports = User;

@@ -46,8 +46,8 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUserStore } from '../stores/user'
-import api from '../services/api'
+import { useUserStore } from '@/stores/user'
+import api from '@/services/api'
 
 const form = ref(null)
 const email = ref('')
