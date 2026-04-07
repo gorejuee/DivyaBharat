@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Welcome to SacredPath</h1>
+    <h1>Welcome to DivyaBharat</h1>
     <p>Discover India's spiritual and heritage places</p>
     <p v-if="status">Backend status: {{ status }}</p>
     <p v-else>Connecting to backend...</p>
