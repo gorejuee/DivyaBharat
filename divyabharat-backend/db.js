@@ -3,9 +3,9 @@ const Place = require('@server/models/Place');
 
 const models = { User, Place };
 
-Object.values(models).forEach((models) => {
-  if (models.associate) {
-    models.associate(models);
+Object.values(models).forEach((model) => {
+  if (model.associate) {
+    model.associate(models);
   }
 });
 

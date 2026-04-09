@@ -3,9 +3,10 @@ moduleAlias.addAlias('@server', __dirname);
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const sequelize = require('./config/database');
-const authRoutes = require('./routes/auth');
-const db = require('./db');
+const sequelize = require('@server/config/database');
+const authRoutes = require('@server/routes/auth');
+const placesRoutes = require('./routes/places');
+const db = require('@server/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,6 +16,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use('/api/auth', authRoutes);
+app.use('/api/places', placesRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' })
