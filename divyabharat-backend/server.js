@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const sequelize = require('./config/database');
 const authRoutes = require('./routes/auth');
+const db = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
