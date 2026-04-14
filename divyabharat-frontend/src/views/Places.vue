@@ -11,7 +11,7 @@
           variant="outlined"
           clearable
           hide-details
-          @input="fetchPlaces"
+          @update:modelValue="debouncedFetch"
         />
       </v-col>
       <v-col cols="12" md="4">
@@ -32,7 +32,7 @@
           variant="outlined"
           clearable
           hide-details
-          @input="fetchPlaces"
+          @update:modelValue="debouncedFetch"
         />
       </v-col>
 
@@ -89,6 +89,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { debounce } from 'lodash';
 import api from '@/services/api';
 import { categoryColor, formatCategory } from '@/utils/placeHelpers';
 
@@ -130,6 +131,8 @@ const fetchPlaces = async () => {
     loading.value = false;
   }
 };
+
+const debouncedFetch = debounce(fetchPlaces, 300);
 
 const goToPlace = (id) => {
   router.push(`/places/${id}`);
