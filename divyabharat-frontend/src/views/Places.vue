@@ -90,6 +90,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/services/api';
+import { categoryColor, formatCategory } from '@/utils/placeHelpers';
 
 const router = useRouter();
 const places = ref([]);
@@ -132,28 +133,6 @@ const fetchPlaces = async () => {
 
 const goToPlace = (id) => {
   router.push(`/places/${id}`);
-};
-
-const categoryColor = (category) => {
-  const colors = {
-    temple: 'orange',
-    fort: 'brown',
-    cave: 'grey',
-    ghat: 'blue',
-    ashram: 'green',
-    gurudwara: 'yellow',
-    sacred_river: 'cyan',
-    ancient_site: 'purple',
-    heritage_village: 'teal',
-    museum: 'indigo',
-    natural_sacred: 'light-green',
-    other: 'default'
-  };
-  return colors[category] || 'default';
-};
-
-const formatCategory = (category) => {
-  return category.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
 onMounted(fetchPlaces);
