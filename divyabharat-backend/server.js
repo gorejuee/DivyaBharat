@@ -7,6 +7,7 @@ const sequelize = require('@server/config/database');
 const authRoutes = require('@server/routes/auth');
 const placesRoutes = require('./routes/places');
 const db = require('@server/db');
+const aiRoutes = require('./routes/ai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,6 +18,7 @@ app.use(cors({
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/places', placesRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' })
