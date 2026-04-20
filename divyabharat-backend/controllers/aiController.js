@@ -1,9 +1,17 @@
 const Groq = require('groq-sdk');
-const { Place } = require('@server/db');
+const crypto = require('crypto');
+const { Place, AiGuideCache } = require('@server/db');
 
 const client = new Groq({
   apiKey: process.env.GROQ_API_KEY
 });
+
+const hashQuestion = (question) => {
+  return crypto
+    .createHash('md5')
+    .update(question.trim().toLowerCase())
+    .digest('hex');
+};
 
 const askGuide = async (req, res) => {
   try {
@@ -20,6 +28,25 @@ const askGuide = async (req, res) => {
 
     if (!place) {
       return res.status(404).json({ message: 'Place not found' });
+    }
+
+    const questionHash = hashQuestion(question);
+
+    const cached = await AiGuideCache.findOne({
+      where: {
+        place_id: placeId,
+        question_hash: questionHash
+      },
+      attributes: ['question', 'answer']
+    });
+
+    if (cached) {
+      return res.json({
+        question: cached.question,
+        answer: cached.answer,
+        place: { id: place.id, name: place.name },
+        cached: true
+      });
     }
 
     const systemPrompt = `You are DivyaBharat AI Guide, an expert on Indian heritage, spirituality, history and culture. 
@@ -46,13 +73,21 @@ const askGuide = async (req, res) => {
 
     const answer = completion.choices[0].message.content;
 
+    await AiGuideCache.create({
+      place_id: placeId,
+      question_hash: questionHash,
+      question: question.trim(),
+      answer
+    });
+
     res.json({
       question,
       answer,
       place: {
         id: place.id,
         name: place.name
-      }
+      },
+      cached: false
     });
   } catch (err) {
     console.error('AI Guide error:', err);
