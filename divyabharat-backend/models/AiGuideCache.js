@@ -13,7 +13,7 @@ const AiGuideCache = sequelize.define('AiGuideCache', {
     allowNull: false
   },
   question_hash: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(32),
     allowNull: false
   },
   question: {

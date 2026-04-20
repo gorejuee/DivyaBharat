@@ -47,6 +47,7 @@ module.exports = {
 
       await queryInterface.addIndex('ai_guide_cache', ['place_id', 'question_hash'], {
         unique: true,
+        name: 'ai_guide_cache_place_question_unique',
         transaction
       });
     });
