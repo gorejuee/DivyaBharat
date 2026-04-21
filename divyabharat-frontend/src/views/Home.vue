@@ -1,25 +1,20 @@
 <template>
-  <div>
-    <h1>Welcome to DivyaBharat</h1>
-    <p>Discover India's spiritual and heritage places</p>
-    <p v-if="status">Backend status: {{ status }}</p>
-    <p v-else>Connecting to backend...</p>
-  </div>
+  <v-container class="text-center py-16">
+    <v-icon size="80" color="primary">mdi-temple-hindu</v-icon>
+    <h1 class="text-h3 font-weight-bold mt-4">DivyaBharat</h1>
+    <p class="text-h6 text-grey mt-3 mb-8">
+      Discover India's spiritual and heritage wonders
+    </p>
+    <v-btn
+      color="primary"
+      size="large"
+      prepend-icon="mdi-compass"
+      to="/places"
+    >
+      Start Exploring
+    </v-btn>
+  </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import api from '@/services/api';
-
-const status = ref(null);
-
-onMounted(async () => {
-  try {
-    const response = await api.get('/health');
-    status.value = response.data.status;
-  } catch (error) {
-    console.error('Backend connection failed:', error);
-    status.value = 'connection failed'
-  }
-})
 </script>
