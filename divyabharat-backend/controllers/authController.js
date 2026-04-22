@@ -8,7 +8,7 @@ const register = async (req, res) => {
 
     const existingUser = await User.findOne({
       where: { email },
-      attributes: ['id', 'email']
+      attributes: ['id', 'email', 'role']
     });
     if (existingUser) {
       return res.status(400).json({ message: 'Email already exists' });
@@ -23,7 +23,7 @@ const register = async (req, res) => {
     });
 
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -31,7 +31,7 @@ const register = async (req, res) => {
     res.status(201).json({
       message: 'User registered successfully',
       token,
-      user: { id: user.id, name: user.name, email: user.email }
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
     });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -44,7 +44,7 @@ const login = async (req, res) => {
 
     const user = await User.findOne({
       where: { email },
-      attributes: ['id', 'name', 'email', 'password']
+      attributes: ['id', 'name', 'email', 'password', 'role']
     });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
@@ -56,7 +56,7 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -64,7 +64,7 @@ const login = async (req, res) => {
     res.json({
       message: 'Login successful',
       token,
-      user: { id: user.id, name: user.name, email: user.email }
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
     });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });

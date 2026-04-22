@@ -5,6 +5,9 @@ export const useUserStore = defineStore('user', {
     user: null,
     token: null
   }),
+  igetters: {
+    isAdmin: (state) => state.user?.role === 'admin',
+  },
   actions: {
     setUser(userData, token) {
       this.user = userData;
