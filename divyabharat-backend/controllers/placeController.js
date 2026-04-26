@@ -45,4 +45,45 @@ const getPlaceById = async (req, res) => {
   }
 };
 
-module.exports = { getAllPlaces, getPlaceById };
+const submitPlace = async (req, res) => {
+  try {
+    const {
+      name,
+      description,
+      history,
+      category,
+      state,
+      city,
+      latitude,
+      longitude,
+      image_url
+    } = req.body;
+
+    const place = await Place.create({
+      name,
+      description,
+      history,
+      category,
+      state,
+      city,
+      latitude: latitude || null,
+      longitude: longitude || null,
+      image_url: image_url || null,
+      status: 'pending',
+      submitted_by: req.user.id
+    });
+
+    res.status(201).json({
+      message: 'Place submitted successfully. It will be visible after admin approval.',
+      place: {
+        id: place.id,
+        name: place.name,
+        status: place.status
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+module.exports = { getAllPlaces, getPlaceById, submitPlace };

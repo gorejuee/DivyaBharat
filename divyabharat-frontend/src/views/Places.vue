@@ -17,7 +17,7 @@
       <v-col cols="12" md="4">
         <v-select
           v-model="selectedCategory"
-          :items="categories"
+          :items="CATEGORIES"
           label="Category"
           variant="outlined"
           clearable
@@ -91,7 +91,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { debounce } from 'lodash';
 import api from '@/services/api';
-import { categoryColor, formatCategory } from '@/utils/placeHelpers';
+import { categoryColor, formatCategory, CATEGORIES } from '@/utils/placeHelpers';
 
 const router = useRouter();
 const places = ref([]);
@@ -99,21 +99,6 @@ const loading = ref(false);
 const search = ref('');
 const selectedCategory = ref(null);
 const selectedState = ref('');
-
-const categories = [
-  { title: 'Temple', value: 'temple' },
-  { title: 'Fort', value: 'fort' },
-  { title: 'Cave', value: 'cave' },
-  { title: 'Ghat', value: 'ghat' },
-  { title: 'Ashram', value: 'ashram' },
-  { title: 'Gurudwara', value: 'gurudwara' },
-  { title: 'Sacred River', value: 'sacred_river' },
-  { title: 'Ancient Site', value: 'ancient_site' },
-  { title: 'Heritage Village', value: 'heritage_village' },
-  { title: 'Museum', value: 'museum' },
-  { title: 'Natural Sacred', value: 'natural_sacred' },
-  { title: 'Other', value: 'other' }
-];
 
 const fetchPlaces = async () => {
   loading.value = true;
