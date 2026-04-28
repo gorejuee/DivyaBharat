@@ -86,4 +86,55 @@ const submitPlace = async (req, res) => {
   }
 };
 
-module.exports = { getAllPlaces, getPlaceById, submitPlace };
+const getPendingPlaces = async (req, res) => {
+  try {
+    const places = await Place.unscoped().findAll({
+      where: { status: 'pending'},
+      attributes: [
+        'id', 'name', 'description', 'history', 'category',
+        'state', 'city', 'latitude', 'longitude', 'image_url',
+        'status', 'submitted_by', 'created_at'
+      ],
+      order: [['created_at', 'ASC']]
+    });
+
+    res.json({ places });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+const reviewPlace= async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status. Must be approved or rejected.' });
+    }
+
+    const place = await Place.unscoped().findOne({
+      where: { id },
+      attributes: ['id', 'name', 'status']
+    });
+
+    if (!place) {
+      return res.status(404).json({ message: 'Place not found.' });
+    }
+
+    if (place.status !== 'pending') {
+      return res.status(400).json({ message: 'Only pending places can be reviewed.' });
+    }
+
+    await place.update({ status });
+
+    res.json({
+      message: `Place ${status} succesfully.`,
+      place: { id: place.id, name: place.name, status: place.status }
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+module.exports = { getAllPlaces, getPlaceById, submitPlace, getPendingPlaces, reviewPlace };

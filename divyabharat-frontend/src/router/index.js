@@ -7,6 +7,7 @@ import Login from '@/views/Login.vue';
 import Places from '@/views/Places.vue';
 import SubmitPlace from '@/views/SubmitPlace.vue';
 import PlaceDetail from '@/views/PlaceDetail.vue';
+import AdminPlaces from '@/views/AdminPlaces.vue';
 
 const routes = [
   { path: '/', component: Home },
@@ -14,6 +15,7 @@ const routes = [
   { path: '/register', component: Register, meta: { guestOnly: true } },
   { path: '/login', component: Login, meta: { guestOnly: true } },
   { path: '/places', component: Places },
+  { path: '/admin/places', component: AdminPlaces, meta: { requiresAdmin: true } },  // ✅ add this
   { path: '/places/submit', component: SubmitPlace },
   { path: '/places/:id', component: PlaceDetail },
 ];
@@ -29,6 +31,10 @@ router.beforeEach((to) => {
 
   if (to.meta.guestOnly && isLoggedIn) {
     return '/places';
+  }
+
+  if (to.meta.requiresAdmin && !userStore.isAdmin) {
+    return '/';
   }
 });
 

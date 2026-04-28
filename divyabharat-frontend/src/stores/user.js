@@ -5,7 +5,7 @@ export const useUserStore = defineStore('user', {
     user: null,
     token: null
   }),
-  igetters: {
+  getters: {
     isAdmin: (state) => state.user?.role === 'admin',
   },
   actions: {
