@@ -96,6 +96,12 @@ Place.associate = (models) => {
     foreignKey: 'submitted_by',
     as: 'submittedBy'
   });
+  Place.belongsToMany(models.User, {
+    through: models.UserPlace,
+    foreignKey: 'place_id',
+    otherKey: 'user_id',
+    as: 'visitedByUsers'
+  });
 };
 
 module.exports = Place;

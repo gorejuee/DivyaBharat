@@ -32,4 +32,12 @@ const User = sequelize.define('User', {
   underscored: true
 });
 
+User.associate = (models) => {
+  User.belongsToMany(models.Place, {
+    through: models.UserPlace,
+    foreignKey: 'user_id',
+    otherKey: 'place_id',
+    as: 'visitedPlaces'
+  });
+}
 module.exports = User;
