@@ -8,6 +8,7 @@ import Places from '@/views/Places.vue';
 import SubmitPlace from '@/views/SubmitPlace.vue';
 import PlaceDetail from '@/views/PlaceDetail.vue';
 import AdminPlaces from '@/views/AdminPlaces.vue';
+import MyPlaces from '@/views/MyPlaces.vue';
 
 const routes = [
   { path: '/', component: Home },
@@ -17,6 +18,7 @@ const routes = [
   { path: '/places', component: Places },
   { path: '/admin/places', component: AdminPlaces, meta: { requiresAdmin: true } },  // ✅ add this
   { path: '/places/submit', component: SubmitPlace },
+  { path: '/my-places', component: MyPlaces },
   { path: '/places/:id', component: PlaceDetail },
 ];
 

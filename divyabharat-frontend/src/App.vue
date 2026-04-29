@@ -19,6 +19,7 @@
 
       <template v-else>
         <v-btn variant="text" color="white" to="/places/submit">Submit a Place</v-btn>
+        <v-btn variant="text" color="white" to="/my-places">My Places</v-btn>
         <v-btn v-if="userStore.isAdmin" variant="text" color="white" to="/admin/places">Admin</v-btn>
         <span class="text-white text-body-2 mr-3">{{ userStore.user?.name }}</span>
         <v-btn variant="outlined" color="white" class="mr-2" @click="logout">Logout</v-btn>
