@@ -47,6 +47,19 @@
           <span class="text-grey text-body-2">{{ place.city }}, {{ place.state }}</span>
         </div>
       </v-col>
+
+      <!-- Visited button — only for logged in users -->
+      <v-col v-if="isLoggedIn" cols="auto">
+        <v-btn
+          :color="isVisited ? 'success' : 'default'"
+          :variant="isVisited ? 'tonal' : 'outlined'"
+          :prepend-icon="isVisited ? 'mdi-check-circle' : 'mdi-map-marker-check-outline'"
+          :loading="visitLoading"
+          @click="toggleVisited"
+        >
+          {{ isVisited ? 'Visited' : 'Mark as Visited' }}
+        </v-btn>
+      </v-col>
     </v-row>
 
     <v-divider class="my-6" />
@@ -209,11 +222,13 @@ const userStore = useUserStore();
 const place = ref(null);
 const loading = ref(false);
 const aiLoading = ref(false);
+const visitLoading = ref(false);
 const currentQuestion = ref('');
 const chatHistory = ref([]);
 const chatContainer = ref(null);
 
 const isLoggedIn = computed(() => !!userStore.token);
+const isVisited = computed(() => place.value ? userStore.isVisited(place.value.id) : false);
 
 const suggestions = [
   'Who built this place?',
@@ -232,6 +247,34 @@ const fetchPlace = async () => {
     place.value = null;
   } finally {
     loading.value = false;
+  }
+};
+
+const fetchVisitedIds = async () => {
+  if (!isLoggedIn.value) return;
+  try {
+    const response = await api.get('/visits/ids');
+    userStore.setVisitedPlaceIds(response.data.visitedPlaceIds);
+  } catch (err) {
+    console.error('Failed to fetch visited ids', err);
+  }
+};
+
+const toggleVisited = async () => {
+  if (!place.value) return;
+  visitLoading.value = true;
+  try {
+    if (isVisited.value) {
+      await api.delete(`/visits/${place.value.id}`);
+      userStore.removeVisitedPlaceId(place.value.id);
+    } else {
+      await api.post('/visits', { placeId: place.value.id });
+      userStore.addVisitedPlaceId(place.value.id);
+    }
+  } catch (err) {
+    console.error('Failed to toggle visited', err);
+  } finally {
+    visitLoading.value = false;
   }
 };
 
@@ -280,5 +323,8 @@ const askSuggestion = (suggestion) => {
   askQuestion();
 };
 
-onMounted(fetchPlace);
+onMounted(async () => {
+  await fetchPlace();
+  await fetchVisitedIds();
+});
 </script>
