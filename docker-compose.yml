@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: divyabharat_db
+    environment:
+      POSTGRES_DB: divyabharat_db
+      POSTGRES_USER: sacredpath_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U sacredpath_user -d divyabharat_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./divyabharat-backend
+    container_name: divyabharat_backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      DB_NAME: divyabharat_db
+      DB_USER: sacredpath_user
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: db
+      JWT_SECRET: ${JWT_SECRET}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./divyabharat-backend:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:
