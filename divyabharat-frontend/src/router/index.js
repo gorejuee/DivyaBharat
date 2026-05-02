@@ -9,6 +9,7 @@ import SubmitPlace from '@/views/SubmitPlace.vue';
 import PlaceDetail from '@/views/PlaceDetail.vue';
 import AdminPlaces from '@/views/AdminPlaces.vue';
 import MyPlaces from '@/views/MyPlaces.vue';
+import AuthCallback from '@/views/AuthCallback.vue';
 
 const routes = [
   { path: '/', component: Home },
@@ -19,6 +20,7 @@ const routes = [
   { path: '/admin/places', component: AdminPlaces, meta: { requiresAdmin: true } },  // ✅ add this
   { path: '/places/submit', component: SubmitPlace },
   { path: '/my-places', component: MyPlaces },
+  { path: '/auth/callback', component: AuthCallback },
   { path: '/places/:id', component: PlaceDetail },
 ];
 

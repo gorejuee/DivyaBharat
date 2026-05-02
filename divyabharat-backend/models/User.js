@@ -19,13 +19,18 @@ const User = sequelize.define('User', {
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
   role: {
     type: DataTypes.ENUM('user', 'admin'),
     allowNull: false,
     defaultValue: 'user',
   },
+  google_id: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true
+  }
 }, {
   tableName: 'users',
   timestamps: true,
@@ -39,5 +44,6 @@ User.associate = (models) => {
     otherKey: 'place_id',
     as: 'visitedPlaces'
   });
-}
+};
+
 module.exports = User;

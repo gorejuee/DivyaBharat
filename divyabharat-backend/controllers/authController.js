@@ -71,4 +71,29 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+const googleCallback = (req, res) => {
+  try {
+    const user = req.user;
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    const userData = encodeURIComponent(JSON.stringify({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    }));
+
+    res.redirect(
+      `http://localhost:5173/auth/callback?token=${token}&user=${userData}`
+    );
+  } catch (err) {
+    res.redirect('http://localhost:5173/login?error=oauth_failed');
+  }
+};
+
+module.exports = { register, login, googleCallback };

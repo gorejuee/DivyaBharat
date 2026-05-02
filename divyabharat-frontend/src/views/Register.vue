@@ -49,6 +49,15 @@
               <router-link to="/login">Login</router-link>
             </p>
           </v-form>
+          <v-divider class="my-4" />
+          <v-btn
+            block
+            variant="outlined"
+            prepend-icon="mdi-google"
+            @click="loginWithGoogle"
+          >
+            Continue with Google
+          </v-btn>
         </v-card>
       </v-col>
     </v-row>
@@ -86,4 +95,8 @@ const register = async () => {
     serverError.value = err.response?.data?.message || 'Registration failed'
   }
 }
+
+const loginWithGoogle = () => {
+  window.location.href = 'http://localhost:3000/api/auth/google';
+};
 </script>

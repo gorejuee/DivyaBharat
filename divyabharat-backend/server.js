@@ -5,6 +5,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const sequelize = require('@server/config/database');
+const passport = require('@server/config/passport');
 const db = require('@server/db');
 
 const authRoutes = require('@server/routes/auth');
@@ -19,6 +20,7 @@ app.use(cors({
     origin: 'http://localhost:5173'
 }));
 app.use(express.json());
+app.use(passport.initialize());
 app.use('/api/auth', authRoutes);
 app.use('/api/places', placesRoutes);
 app.use('/api/ai', aiRoutes);
