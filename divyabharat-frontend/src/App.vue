@@ -11,6 +11,7 @@
 
       <v-btn variant="text" color="white" to="/">Home</v-btn>
       <v-btn variant="text" color="white" to="/places">Explore</v-btn>
+      <v-btn variant="text" color="white" to="/map">Map</v-btn>
 
       <template v-if="!isLoggedIn">
         <v-btn variant="text" color="white" to="/login">Login</v-btn>
