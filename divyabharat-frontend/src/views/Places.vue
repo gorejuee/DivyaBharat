@@ -1,8 +1,12 @@
 <template>
-  <v-container>
-    <h1 class="mb-6">Explore DivyaBharat</h1>
+  <v-container class="py-8 page-container">
 
-    <v-row class="mb-4">
+    <div class="mb-8">
+      <p class="page-eyebrow">Browse and discover</p>
+      <h1 class="font-playfair page-title">Explore DivyaBharat</h1>
+    </div>
+
+    <v-row class="mb-6" align="center">
       <v-col cols="12" md="5">
         <v-text-field
           v-model="search"
@@ -11,6 +15,8 @@
           variant="outlined"
           clearable
           hide-details
+          base-color="primary"
+          color="primary"
           @update:modelValue="debouncedFetch"
         />
       </v-col>
@@ -22,6 +28,8 @@
           variant="outlined"
           clearable
           hide-details
+          base-color="primary"
+          color="primary"
           @update:modelValue="fetchPlaces"
         />
       </v-col>
@@ -32,68 +40,72 @@
           variant="outlined"
           clearable
           hide-details
+          base-color="primary"
+          color="primary"
           @update:modelValue="debouncedFetch"
         />
       </v-col>
-
-      <v-row v-if="loading">
-        <v-col class="text-center py-10">
-          <v-progress-circular indeterminate color="primary" size="48" />
-        </v-col>
-      </v-row>
-
-      <v-row v-else-if="places.length === 0">
-        <v-col class="text-center py-10">
-          <v-icon size="64" color="grey">mdi-map-search</v-icon>
-          <p class="mt-4 text-grey">No places found</p>
-        </v-col>
-      </v-row>
-
-      <v-row v-else>
-        <v-col
-          v-for="place in places"
-          :key="place.id"
-          cols="12" sm="6" md="4"
-        >
-          <v-card
-            class="h-100"
-            hover
-            @click="goToPlace(place.id)"
-          >
-            <v-img
-              :src="place.image_url || 'https://placehold.co/400x200?text=DivyaBharat'"
-              height="200"
-              cover
-            />
-            <v-card-title class="text-wrap">{{ place.name }}</v-card-title>
-            <v-card-subtitle>{{ place.city }}, {{ place.state }}</v-card-subtitle>
-            <v-card-text>
-              {{ place.description?.slice(0, 100) }}...
-            </v-card-text>
-            <v-card-actions>
-              <v-chip
-                :color="categoryColor(place.category)"
-                size="small"
-                variant="tonal"
-              >
-                {{ formatCategory(place.category) }}
-              </v-chip>
-            </v-card-actions>
-          </v-card>
-        </v-col>
-      </v-row>
     </v-row>
+
+    <div v-if="!loading && places.length" class="mb-4">
+      <p class="results-count">
+        Showing {{ places.length }} place{{ places.length === 1 ? '' : 's' }}
+      </p>
+    </div>
+
+    <v-row v-if="loading">
+      <v-col v-for="n in 6" :key="n" cols="12" sm="6" md="4">
+        <v-card elevation="0" rounded="lg" class="skeleton-card">
+          <v-skeleton-loader type="image, article" color="surface" />
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <v-row v-else-if="places.length === 0">
+      <v-col class="text-center py-16">
+        <v-icon size="64" color="primary" class="empty-icon">mdi-map-search</v-icon>
+        <h3 class="font-playfair mt-4 empty-title">No places found</h3>
+        <p class="empty-sub mt-2">Try a different search or category</p>
+        <v-btn
+          variant="text"
+          color="primary"
+          class="mt-4"
+          prepend-icon="mdi-refresh"
+          @click="clearFilters"
+        >
+          Clear filters
+        </v-btn>
+      </v-col>
+    </v-row>
+
+    <transition-group
+      v-else
+      name="card-stagger"
+      tag="div"
+      class="places-grid"
+    >
+      <PlaceCard
+        v-for="place in places"
+        :key="place.id"
+        :place="place"
+        :style="{ transitionDelay: `${places.indexOf(place) * 40}ms` }"
+        @click="goToPlace(place.id)"
+      />
+    </transition-group>
+
   </v-container>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { debounce } from 'lodash';
 import api from '@/services/api';
-import { categoryColor, formatCategory, CATEGORIES } from '@/utils/placeHelpers';
+import { CATEGORIES } from '@/utils/placeHelpers';
+import PlaceCard from '@/components/PlaceCard.vue';
 
 const router = useRouter();
+const route = useRoute();
 const places = ref([]);
 const loading = ref(false);
 const search = ref('');
@@ -119,9 +131,89 @@ const fetchPlaces = async () => {
 
 const debouncedFetch = debounce(fetchPlaces, 300);
 
+const clearFilters = () => {
+  search.value = '';
+  selectedCategory.value = null;
+  selectedState.value = '';
+  fetchPlaces();
+};
+
 const goToPlace = (id) => {
   router.push(`/places/${id}`);
 };
 
-onMounted(fetchPlaces);
+onMounted(() => {
+  if (route.query.category) {
+    selectedCategory.value = route.query.category;
+  }
+  fetchPlaces();
+});
 </script>
+
+<style scoped>
+.page-container {
+  max-width: 1200px;
+}
+
+.page-eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #B45309;
+  margin-bottom: 4px;
+}
+
+.page-title {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  color: #2C1810;
+  line-height: 1.2;
+}
+
+.results-count {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  color: #78614A;
+}
+
+.empty-icon {
+  opacity: 0.4;
+}
+
+.empty-title {
+  color: #2C1810;
+}
+
+.empty-sub {
+  font-family: 'Inter', sans-serif;
+  color: #78614A;
+}
+
+.skeleton-card {
+  border: 1px solid rgba(180, 83, 9, 0.1);
+}
+
+.places-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.card-stagger-enter-active {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.card-stagger-enter-from {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.card-stagger-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.card-stagger-leave-to {
+  opacity: 0;
+}
+</style>

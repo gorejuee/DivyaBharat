@@ -9,7 +9,33 @@ import * as directives from 'vuetify/directives';
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
 
-const vuetify = createVuetify({ components, directives });
+const vuetify = createVuetify({
+  components,
+  directives,
+  theme: {
+    defaultTheme: 'divyaBharatTheme',
+    themes: {
+      divyaBharatTheme: {
+        dark: false,
+        colors: {
+          primary: '#B45309',
+          secondary: '#D97706',
+          accent: '#F59E0B',
+          background: '#FDF8F0',
+          surface: '#FFF8ED',
+          error: '#DC2626',
+          success: '#15803D',
+          warning: '#D97706',
+          info: '#1D4ED8',
+          'on-primary': '#FFFFFF',
+          'on-background': '#2C1810',
+          'on-surface': '#2C1810',
+        }
+      }
+    }
+  }
+});
+
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
