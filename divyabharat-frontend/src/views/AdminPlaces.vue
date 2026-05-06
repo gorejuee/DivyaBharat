@@ -1,11 +1,27 @@
 <template>
-  <v-container class="py-8">
-    <h1 class="text-h5 font-weight-bold mb-2">Admin Panel</h1>
-    <p class="text-grey text-body-2 mb-6">Review and manage place submissions.</p>
+  <v-container class="py-8" style="max-width: 1000px;">
 
-    <v-progress-circular v-if="loading" indeterminate color="primary" class="d-block mx-auto my-10" />
-    
-    <v-alert v-else-if="!places.length" type="info" variant="tonal">
+    <div class="mb-8">
+      <p class="text-caption font-weight-bold text-uppercase mb-1"
+         style="letter-spacing: 3px; color: #B45309;">
+        Admin
+      </p>
+      <h1 class="font-playfair text-h4 font-weight-bold" style="color: #2C1810;">
+        Place Submissions
+      </h1>
+      <p class="text-body-2 mt-2" style="color: #78614A;">
+        Review and manage community submitted places.
+      </p>
+    </div>
+
+    <v-progress-circular
+      v-if="loading"
+      indeterminate
+      color="primary"
+      class="d-block mx-auto my-10"
+    />
+
+    <v-alert v-else-if="!places.length" type="info" variant="tonal" color="primary" rounded="lg">
       No pending submissions right now.
     </v-alert>
 
@@ -14,32 +30,46 @@
         v-for="place in places"
         :key="place.id"
         class="mb-4"
-        variant="outlined"
+        elevation="0"
+        rounded="lg"
+        style="border: 1px solid rgba(180,83,9,0.12); background: #FFFBF4;"
       >
         <v-card-text>
           <v-row align="start">
             <v-col cols="12" md="8">
-              <div class="d-flex align-center ga-2 mb-1">
-                <span class="text-body-1 font-weight-bold">{{ place.name }}</span>
+              <div class="d-flex align-center ga-2 mb-2">
+                <span
+                  class="font-playfair text-body-1 font-weight-bold"
+                  style="color: #2C1810;"
+                >
+                  {{ place.name }}
+                </span>
                 <v-chip size="x-small" color="warning" variant="tonal">pending</v-chip>
               </div>
 
-              <p class="text-caption text-grey mb-2">
-                {{ formatCategory(place.category) }} &bull;
-                {{ place.city ? place.city + ', ' : '' }}{{ place.state }} &bull;
+              <p class="text-caption mb-3" style="color: #78614A;">
+                {{ formatCategory(place.category) }}
+                &bull;
+                {{ place.city ? place.city + ', ' : '' }}{{ place.state }}
+                &bull;
                 Submitted {{ formatDate(place.created_at) }}
               </p>
 
-              <p v-if="place.description" class="text-body-2 mb-2">
+              <p v-if="place.description" class="text-body-2 mb-2" style="color: #3D2812;">
                 {{ place.description }}
               </p>
 
-              <p v-if="place.history" class="text-body-2 text-grey">
+              <p v-if="place.history" class="text-body-2 mb-2" style="color: #78614A;">
                 <strong>History:</strong> {{ place.history }}
               </p>
 
-              <p v-if="place.latitude && place.longitude" class="text-caption text-grey mt-2">
-                📍 {{ place.latitude }}, {{ place.longitude }}
+              <p
+                v-if="place.latitude && place.longitude"
+                class="text-caption mt-2"
+                style="color: #B45309;"
+              >
+                <v-icon size="12" color="primary">mdi-map-marker</v-icon>
+                {{ place.latitude }}, {{ place.longitude }}
               </p>
             </v-col>
 
@@ -56,6 +86,7 @@
               <v-btn
                 color="success"
                 variant="tonal"
+                rounded="lg"
                 block
                 class="mb-2"
                 :loading="actionLoadingId === place.id + '_approve'"
@@ -68,6 +99,7 @@
               <v-btn
                 color="error"
                 variant="tonal"
+                rounded="lg"
                 block
                 :loading="actionLoadingId === place.id + '_reject'"
                 @click="reviewPlace(place.id, 'rejected')"
@@ -81,7 +113,7 @@
       </v-card>
     </div>
 
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" rounded="lg">
       {{ snackbar.message }}
     </v-snackbar>
   </v-container>
@@ -107,10 +139,12 @@ const showSnackbar = (message, color = 'success') => {
 };
 
 const formatDate = (dateStr) => {
-  return new Date(dateStr).toLocaleDateString('en-IN', {
+  return new Date(dateStr).toLocaleString('en-IN', {
     day: 'numeric',
     month: 'short',
-    year: 'numeric'
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
   });
 };
 
