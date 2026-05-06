@@ -2,21 +2,34 @@
   <v-container fluid class="pa-0" style="height: calc(100vh - 64px); position: relative;">
 
     <!-- Filters overlay -->
-    <div style="position: absolute; top: 16px; left: 16px; z-index: 1000; min-width: 220px;">
-      <v-card class="pa-3" elevation="3">
+    <div style="position: absolute; top: 75px; left: 16px; z-index: 1000; min-width: 240px;">
+      <v-card
+        elevation="3"
+        rounded="lg"
+        class="pa-3"
+        style="background: #FFFBF4; border: 1px solid rgba(180,83,9,0.12);"
+      >
+        <p
+          class="text-caption font-weight-bold text-uppercase mb-2"
+          style="letter-spacing: 2px; color: #B45309;"
+        >
+          Filter
+        </p>
         <v-select
           v-model="selectedCategory"
           :items="CATEGORIES"
           :disabled="loading"
-          label="Filter by category"
+          label="Category"
           variant="outlined"
+          color="primary"
+          base-color="primary"
           density="compact"
           clearable
           hide-details
           class="mb-2"
           @update:modelValue="filterPlaces"
         />
-        <p class="text-caption text-grey mt-1">
+        <p class="text-caption mt-1" style="color: #78614A;">
           Showing {{ filteredPlaces.length }} of {{ places.length }} places
         </p>
       </v-card>
