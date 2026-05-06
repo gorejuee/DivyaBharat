@@ -1,211 +1,257 @@
 <template>
-  <v-container v-if="loading" class="text-center py-16">
-    <v-progress-circular indeterminate color="primary" size="64" />
-  </v-container>
+  <div>
+    <v-container v-if="loading" class="text-center py-16">
+      <v-progress-circular indeterminate color="primary" size="64" />
+    </v-container>
 
-  <v-container v-else-if="!place" class="text-center py-16">
-    <v-icon size="64" color="grey">mdi-map-marker-off</v-icon>
-    <h2 class="mt-4 text-grey">Place not found</h2>
-    <v-btn class="mt-4" color="primary" @click="router.push('/places')">
-      Back to Explore
-    </v-btn>
-  </v-container>
+    <v-container v-else-if="!place" class="text-center py-16">
+      <v-icon size="64" color="primary" style="opacity: 0.4;">mdi-map-marker-off</v-icon>
+      <h2 class="font-playfair mt-4" style="color: #2C1810;">Place not found</h2>
+      <v-btn class="mt-4" color="primary" variant="tonal" @click="router.push('/places')">
+        Back to Explore
+      </v-btn>
+    </v-container>
 
-  <v-container v-else>
-    <!-- Back button -->
-    <v-btn
-      variant="text"
-      prepend-icon="mdi-arrow-left"
-      class="mb-4 px-0"
-      @click="router.push('/places')"
-    >
-      Back to Explore
-    </v-btn>
-
-    <!-- Hero Image -->
-    <v-img
-      :src="place.image_url || 'https://placehold.co/1200x400?text=DivyaBharat'"
-      height="400"
-      cover
-      rounded="lg"
-      class="mb-6"
-    />
-
-    <!-- Title and category -->
-    <v-row class="mb-2" align="center">
-      <v-col>
-        <h1 class="text-h4 font-weight-bold">{{ place.name }}</h1>
-        <div class="mt-2 d-flex align-center ga-2">
-          <v-chip
-            :color="categoryColor(place.category)"
-            variant="tonal"
-            size="small"
-          >
-            {{ formatCategory(place.category) }}
-          </v-chip>
-          <v-icon size="16" color="grey" class="ml-2">mdi-map-marker</v-icon>
-          <span class="text-grey text-body-2">{{ place.city }}, {{ place.state }}</span>
-        </div>
-      </v-col>
-
-      <!-- Visited button — only for logged in users -->
-      <v-col v-if="isLoggedIn" cols="auto">
-        <v-btn
-          :color="isVisited ? 'success' : 'default'"
-          :variant="isVisited ? 'tonal' : 'outlined'"
-          :prepend-icon="isVisited ? 'mdi-check-circle' : 'mdi-map-marker-check-outline'"
-          :loading="visitLoading"
-          @click="toggleVisited"
+    <template v-else>
+      <!-- Hero Image -->
+      <div class="detail-hero">
+        <v-img
+          :src="place.image_url"
+          height="480"
+          cover
+          class="detail-hero-img"
         >
-          {{ isVisited ? 'Visited' : 'Mark as Visited' }}
-        </v-btn>
-      </v-col>
-    </v-row>
-
-    <v-divider class="my-6" />
-
-    <!-- Description -->
-    <section class="mb-8">
-      <h2 class="text-h6 font-weight-bold mb-3">About</h2>
-      <p class="text-body-1">{{ place.description }}</p>
-    </section>
-
-    <!-- History -->
-    <section v-if="place.history" class="mb-8">
-      <h2 class="text-h6 font-weight-bold mb-3">
-        <v-icon class="mr-2" color="primary">mdi-book-open-variant</v-icon>
-        History
-      </h2>
-      <v-card variant="tonal" color="primary" class="pa-4">
-        <p class="text-body-1">{{ place.history }}</p>
-      </v-card>
-    </section>
-
-    <!-- Location -->
-    <section v-if="place.latitude && place.longitude" class="mb-8">
-      <h2 class="text-h6 font-weight-bold mb-3">
-        <v-icon class="mr-2" color="primary">mdi-map</v-icon>
-        Location
-      </h2>
-      <v-card variant="outlined" class="pa-4">
-        <p class="text-body-2 text-grey">
-          Coordinates: {{ place.latitude }}, {{ place.longitude }}
-        </p>
-        <v-btn
-          class="mt-3"
-          color="primary"
-          variant="tonal"
-          prepend-icon="mdi-google-maps"
-          :href="`https://www.google.com/maps?q=${place.latitude},${place.longitude}`"
-          target="_blank"
-        >
-          Open in Google Maps
-        </v-btn>
-      </v-card>
-    </section>
-
-    <!-- AI Guide -->
-    <section class="mb-8">
-      <h2 class="text-h6 font-weight-bold mb-3">
-        <v-icon class="mr-2" color="primary">mdi-robot</v-icon>
-        Ask AI Guide
-      </h2>
-
-      <v-card v-if="!isLoggedIn" variant="outlined" class="pa-6 text-center">
-        <v-icon size="48" color="grey">mdi-lock-outline</v-icon>
-        <p class="mt-3 text-grey">Please login to use the AI Guide</p>
-        <v-btn class="mt-3" color="primary" @click="router.push('/login')">
-          Login
-        </v-btn>
-      </v-card>
-
-      <v-card v-else variant="outlined">
-        <div class="pa-4" style="min-height: 200px; max-height: 400px; overflow-y: auto;" ref="chatContainer">
-          <div v-if="chatHistory.length === 0" class="text-center py-8">
-            <v-icon size="48" color="grey">mdi-robot-outline</v-icon>
-            <p class="mt-3 text-grey text-body-2">
-              Ask me anything about {{ place.name }}
-            </p>
-            <div class="mt-4 d-flex flex-wrap justify-center gap-2">
-              <v-chip
-                v-for="suggestion in suggestions"
-                :key="suggestion"
-                size="small"
-                variant="tonal"
-                color="primary"
-                style="cursor: pointer"
-                @click="askSuggestion(suggestion)"
-              >
-                {{ suggestion }}
-              </v-chip>
+          <template #placeholder>
+            <div
+              class="d-flex align-center justify-center"
+              :style="{ height: '480px', background: gradients[place.category] || gradients.other }"
+            >
+              <v-icon size="80" color="white" style="opacity: 0.5;">
+                {{ icons[place.category] || 'mdi-map-marker' }}
+              </v-icon>
             </div>
+          </template>
+          <template #error>
+            <div
+              class="d-flex align-center justify-center flex-column ga-3"
+              :style="{ height: '480px', background: gradients[place.category] || gradients.other }"
+            >
+              <v-icon size="80" color="white" style="opacity: 0.6;">
+                {{ icons[place.category] || 'mdi-map-marker' }}
+              </v-icon>
+              <span class="text-white text-h6 font-playfair" style="opacity: 0.8;">
+                {{ place.name }}
+              </span>
+            </div>
+          </template>
+          <div class="detail-hero-overlay" />
+        </v-img>
+
+        <!-- Back button overlaid on hero -->
+        <div class="detail-back-btn">
+          <v-btn
+            variant="tonal"
+            prepend-icon="mdi-arrow-left"
+            style="background: rgba(0,0,0,0.45); color: #FDF8F0;"
+            @click="router.push('/places')"
+          >
+            Back to Explore
+          </v-btn>
+        </div>
+      </div>
+
+      <v-container class="detail-container">
+
+        <!-- Title row -->
+        <v-row class="mb-2 mt-6" align="start">
+          <v-col>
+            <h1 class="font-playfair detail-title">{{ place.name }}</h1>
+            <div class="mt-3 d-flex align-center flex-wrap ga-2">
+              <v-chip
+                :color="categoryColor(place.category)"
+                variant="flat"
+                size="small"
+              >
+                {{ formatCategory(place.category) }}
+              </v-chip>
+              <span class="detail-location">
+                <v-icon size="14" color="primary">mdi-map-marker</v-icon>
+                {{ place.city ? place.city + ', ' : '' }}{{ place.state }}
+              </span>
+            </div>
+          </v-col>
+
+          <v-col v-if="isLoggedIn" cols="auto" class="mt-1">
+            <v-btn
+              :color="isVisited ? 'success' : 'primary'"
+              :variant="isVisited ? 'tonal' : 'outlined'"
+              :prepend-icon="isVisited ? 'mdi-check-circle' : 'mdi-map-marker-check-outline'"
+              :loading="visitLoading"
+              @click="toggleVisited"
+            >
+              {{ isVisited ? 'Visited' : 'Mark as Visited' }}
+            </v-btn>
+          </v-col>
+        </v-row>
+
+        <v-divider class="my-6" color="primary" style="opacity: 0.15;" />
+
+        <!-- About -->
+        <section class="mb-10">
+          <div class="section-label">
+            <v-icon size="18" color="primary" class="mr-2">mdi-information-outline</v-icon>
+            <span class="section-label-text">About</span>
+          </div>
+          <p class="detail-body mt-3">{{ place.description }}</p>
+        </section>
+
+        <!-- History -->
+        <section v-if="place.history" class="mb-10">
+          <div class="section-label">
+            <v-icon size="18" color="primary" class="mr-2">mdi-book-open-variant</v-icon>
+            <span class="section-label-text">History</span>
+          </div>
+          <v-card
+            variant="tonal"
+            color="primary"
+            rounded="lg"
+            class="pa-5 mt-3"
+            elevation="0"
+          >
+            <p class="detail-body">{{ place.history }}</p>
+          </v-card>
+        </section>
+
+        <!-- Location -->
+        <section v-if="place.latitude && place.longitude" class="mb-10">
+          <div class="section-label">
+            <v-icon size="18" color="primary" class="mr-2">mdi-map</v-icon>
+            <span class="section-label-text">Location</span>
+          </div>
+          <v-card variant="outlined" rounded="lg" class="pa-4 mt-3" elevation="0">
+            <p class="text-body-2" style="color: #78614A;">
+              Coordinates: {{ place.latitude }}, {{ place.longitude }}
+            </p>
+            <v-btn
+              class="mt-3"
+              color="primary"
+              variant="tonal"
+              prepend-icon="mdi-google-maps"
+              :href="`https://www.google.com/maps?q=${place.latitude},${place.longitude}`"
+              target="_blank"
+            >
+              Open in Google Maps
+            </v-btn>
+          </v-card>
+        </section>
+
+        <!-- AI Guide -->
+        <section class="mb-10">
+          <div class="section-label mb-3">
+            <v-icon size="18" color="primary" class="mr-2">mdi-robot</v-icon>
+            <span class="section-label-text">Ask AI Guide</span>
           </div>
 
-          <div v-else>
-            <div
-              v-for="(msg, index) in chatHistory"
-              :key="index"
-              class="mb-4"
-            >
-              <div class="d-flex justify-end mb-2">
-                <v-card
-                  color="primary"
-                  variant="tonal"
-                  class="pa-3"
-                  style="max-width: 80%"
-                >
-                  <p class="text-body-2">{{ msg.question }}</p>
-                </v-card>
+          <v-card v-if="!isLoggedIn" variant="outlined" rounded="lg" class="pa-6 text-center" elevation="0">
+            <v-icon size="48" color="primary" style="opacity: 0.4;">mdi-lock-outline</v-icon>
+            <p class="mt-3 detail-body">Please login to use the AI Guide</p>
+            <v-btn class="mt-4" color="primary" variant="tonal" @click="router.push('/login')">
+              Login
+            </v-btn>
+          </v-card>
+
+          <v-card v-else variant="outlined" rounded="lg" elevation="0">
+            <div class="chat-container" ref="chatContainer">
+              <div v-if="chatHistory.length === 0" class="text-center py-8">
+                <v-icon size="48" color="primary" style="opacity: 0.4;">mdi-robot-outline</v-icon>
+                <p class="mt-3 text-body-2" style="color: #78614A;">
+                  Ask me anything about {{ place.name }}
+                </p>
+                <div class="mt-4 d-flex flex-wrap justify-center ga-2">
+                  <v-chip
+                    v-for="suggestion in suggestions"
+                    :key="suggestion"
+                    size="small"
+                    variant="tonal"
+                    color="primary"
+                    class="suggestion-chip"
+                    @click="askSuggestion(suggestion)"
+                  >
+                    {{ suggestion }}
+                  </v-chip>
+                </div>
               </div>
 
-              <div class="d-flex justify-start">
-                <div class="d-flex align-start gap-2" style="max-width: 80%">
-                  <v-icon color="primary" size="20" class="mt-1">mdi-robot</v-icon>
-                  <v-card variant="tonal" color="grey" class="pa-3">
-                    <p class="text-body-2">{{ msg.answer }}</p>
-                    <p v-if="msg.cached" class="text-caption text-grey mt-1">
-                      <v-icon size="12">mdi-lightning-bolt</v-icon>
-                      Cached response
-                    </p>
-                  </v-card>
+              <div v-else>
+                <div
+                  v-for="(msg, index) in chatHistory"
+                  :key="index"
+                  class="mb-4"
+                >
+                  <div class="d-flex justify-end mb-2">
+                    <v-card
+                      color="primary"
+                      variant="tonal"
+                      class="pa-3 chat-bubble"
+                      elevation="0"
+                    >
+                      <p class="text-body-2">{{ msg.question }}</p>
+                    </v-card>
+                  </div>
+
+                  <div class="d-flex justify-start">
+                    <div class="d-flex align-start ga-2 chat-bubble">
+                      <v-icon color="primary" size="20" class="mt-1">mdi-robot</v-icon>
+                      <v-card variant="tonal" color="grey" class="pa-3" elevation="0">
+                        <p class="text-body-2" style="color: #1C1209;">{{ msg.answer }}</p>
+                        <p v-if="msg.cached" class="text-caption mt-1" style="color: #78614A;">
+                          <v-icon size="12" color="primary">mdi-lightning-bolt</v-icon>
+                          Cached response
+                        </p>
+                      </v-card>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="aiLoading" class="d-flex justify-start mb-4">
+                  <div class="d-flex align-start ga-2">
+                    <v-icon color="primary" size="20" class="mt-1">mdi-robot</v-icon>
+                    <v-card variant="tonal" color="grey" class="pa-3" elevation="0">
+                      <v-progress-circular indeterminate size="16" width="2" color="primary" />
+                    </v-card>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div v-if="aiLoading" class="d-flex justify-start mb-4">
-              <div class="d-flex align-start gap-2">
-                <v-icon color="primary" size="20" class="mt-1">mdi-robot</v-icon>
-                <v-card variant="tonal" color="grey" class="pa-3">
-                  <v-progress-circular indeterminate size="16" width="2" color="primary" />
-                </v-card>
-              </div>
+            <v-divider color="primary" style="opacity: 0.1;" />
+
+            <div class="pa-4 d-flex ga-2">
+              <v-text-field
+                v-model="currentQuestion"
+                placeholder="Ask anything about this place..."
+                variant="outlined"
+                density="compact"
+                hide-details
+                color="primary"
+                base-color="primary"
+                :disabled="aiLoading"
+                @keyup.enter="askQuestion"
+              />
+              <v-btn
+                color="primary"
+                icon="mdi-send"
+                :loading="aiLoading"
+                :disabled="!currentQuestion.trim()"
+                @click="askQuestion"
+              />
             </div>
-          </div>
-        </div>
+          </v-card>
+        </section>
 
-        <v-divider />
-
-        <div class="pa-4 d-flex gap-2">
-          <v-text-field
-            v-model="currentQuestion"
-            placeholder="Ask anything about this place..."
-            variant="outlined"
-            density="compact"
-            hide-details
-            :disabled="aiLoading"
-            @keyup.enter="askQuestion"
-          />
-          <v-btn
-            color="primary"
-            icon="mdi-send"
-            :loading="aiLoading"
-            :disabled="!currentQuestion.trim()"
-            @click="askQuestion"
-          />
-        </div>
-      </v-card>
-    </section>
-  </v-container>
+      </v-container>
+    </template>
+  </div>
 </template>
 
 <script setup>
@@ -213,7 +259,12 @@ import { ref, onMounted, nextTick, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import api from '@/services/api';
-import { categoryColor, formatCategory } from '@/utils/placeHelpers';
+import {
+  categoryColor,
+  formatCategory,
+  categoryGradients as gradients,
+  categoryIcons as icons
+} from '@/utils/placeHelpers';
 
 const route = useRoute();
 const router = useRouter();
@@ -287,25 +338,20 @@ const scrollToBottom = async () => {
 
 const askQuestion = async () => {
   if (!currentQuestion.value.trim() || aiLoading.value) return;
-
   const question = currentQuestion.value.trim();
   currentQuestion.value = '';
   aiLoading.value = true;
-
   await scrollToBottom();
-
   try {
     const response = await api.post('/ai/ask', {
       placeId: place.value.id,
       question
     });
-
     chatHistory.value.push({
       question,
       answer: response.data.answer,
       cached: response.data.cached
     });
-
     await scrollToBottom();
   } catch (err) {
     chatHistory.value.push({
@@ -328,3 +374,80 @@ onMounted(async () => {
   await fetchVisitedIds();
 });
 </script>
+
+<style scoped>
+.detail-hero {
+  position: relative;
+}
+
+.detail-hero-img {
+  width: 100%;
+}
+
+.detail-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(28, 18, 9, 0.15) 0%,
+    rgba(28, 18, 9, 0.5) 100%
+  );
+}
+
+.detail-back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1;
+}
+
+.detail-container {
+  max-width: 900px;
+}
+
+.detail-title {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  color: #2C1810;
+  line-height: 1.2;
+}
+
+.detail-location {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  color: #B45309;
+}
+
+.detail-body {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  color: #3D2812;
+  line-height: 1.8;
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+}
+
+.section-label-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2C1810;
+}
+
+.chat-container {
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.chat-bubble {
+  max-width: 80%;
+}
+
+.suggestion-chip {
+  cursor: pointer;
+}
+</style>
