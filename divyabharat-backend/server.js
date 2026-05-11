@@ -12,6 +12,8 @@ const authRoutes = require('@server/routes/auth');
 const placesRoutes = require('@server/routes/places');
 const aiRoutes = require('@server/routes/ai');
 const visitsRoutes = require('@server/routes/visits');
+const adminRoutes = require('@server/routes/admin');
+const { startWikidataSync } = require('@server/jobs/wikidataSync');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +27,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/places', placesRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/visits', visitsRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' })
@@ -33,6 +36,7 @@ app.get('/api/health', (req, res) => {
 sequelize.authenticate()
     .then(() => {
         console.log('DB connected successfully');
+        startWikidataSync();
     })
     .catch((err) => {
         console.error('DB connection failed:', err);

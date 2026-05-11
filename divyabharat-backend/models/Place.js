@@ -73,7 +73,17 @@ const Place = sequelize.define('Place', {
   submitted_by: {
     type: DataTypes.UUID,
     allowNull: true
-  }
+  },
+  wikidata_id: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true
+  },
+  source: {
+    type: DataTypes.ENUM('wikidata', 'community'),
+    allowNull: false,
+    defaultValue: 'community'
+  },
 }, {
   tableName: 'places',
   timestamps: true,

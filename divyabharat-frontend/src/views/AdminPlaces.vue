@@ -6,6 +6,67 @@
          style="letter-spacing: 3px; color: #B45309;">
         Admin
       </p>
+
+      <!-- Wikidata Import -->
+      <v-card
+        elevation="0"
+        rounded="lg"
+        class="mb-8 pa-5"
+        style="background: #FFFBF4; border: 1px solid rgba(180,83,9,0.12);"
+      >
+        <v-row align="center">
+          <v-col>
+            <p class="font-playfair text-h6 font-weight-bold" style="color: #2C1810;">
+              Import from Wikidata
+            </p>
+            <p class="text-body-2 mt-1" style="color: #78614A;">
+              Fetch and sync Indian heritage places from Wikidata. New places are inserted,
+              existing Wikidata places are updated, community submissions are never overwritten.
+              A daily sync also runs automatically at 2 AM IST.
+            </p>
+          </v-col>
+          <v-col cols="auto">
+            <v-btn
+              color="primary"
+              variant="flat"
+              rounded="lg"
+              prepend-icon="mdi-cloud-download"
+              :loading="importLoading"
+              @click="triggerImport"
+            >
+              Import Now
+            </v-btn>
+          </v-col>
+        </v-row>
+
+        <v-alert
+          v-if="importResult"
+          type="success"
+          variant="tonal"
+          rounded="lg"
+          class="mt-4"
+          closable
+          @click:close="importResult = null"
+        >
+          Import complete — {{ importResult.inserted }} inserted,
+          {{ importResult.updated }} updated,
+          {{ importResult.skipped }} skipped,
+          {{ importResult.errors }} errors.
+        </v-alert>
+
+        <v-alert
+          v-if="importError"
+          type="error"
+          variant="tonal"
+          rounded="lg"
+          class="mt-4"
+          closable
+          @click:close="importError = null"
+        >
+          {{ importError }}
+        </v-alert>
+      </v-card>
+
       <h1 class="font-playfair text-h4 font-weight-bold" style="color: #2C1810;">
         Place Submissions
       </h1>
@@ -127,6 +188,9 @@ import { formatCategory } from '@/utils/placeHelpers';
 const places = ref([]);
 const loading = ref(false);
 const actionLoadingId = ref(null);
+const importLoading = ref(false);
+const importResult = ref(null);
+const importError = ref(null);
 
 const snackbar = ref({
   show: false,
@@ -173,6 +237,20 @@ const reviewPlace = async (id, status) => {
     showSnackbar(err.response?.data?.message || 'Action failed.', 'error');
   } finally {
     actionLoadingId.value = null;
+  }
+};
+
+const triggerImport = async () => {
+  importLoading.value = true;
+  importResult.value = null;
+  importError.value = null;
+  try {
+    const response = await api.post('/admin/import-wikidata');
+    importResult.value = response.data.summary;
+  } catch (err) {
+    importError.value = err.response?.data?.message || 'Import failed. Please try again.';
+  } finally {
+    importLoading.value = false;
   }
 };
 
