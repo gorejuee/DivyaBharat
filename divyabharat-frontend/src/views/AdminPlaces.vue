@@ -48,7 +48,7 @@
           closable
           @click:close="importResult = null"
         >
-          Import complete — {{ importResult.inserted }} inserted,
+          Import complete - {{ importResult.inserted }} inserted,
           {{ importResult.updated }} updated,
           {{ importResult.skipped }} skipped,
           {{ importResult.errors }} errors.

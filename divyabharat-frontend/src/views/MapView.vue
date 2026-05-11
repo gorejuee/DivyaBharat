@@ -176,7 +176,7 @@ const fetchPlaces = async () => {
   loading.value = true;
   error.value = null;
   try {
-    const response = await api.get('/places');
+    const response = await api.get('/places', { params: { limit: 500, page: 1 } });
     places.value = response.data.places;
   } catch (err) {
     console.error('Failed to fetch places for map', err);

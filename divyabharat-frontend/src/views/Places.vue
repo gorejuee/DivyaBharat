@@ -47,9 +47,12 @@
       </v-col>
     </v-row>
 
-    <div v-if="!loading && places.length" class="mb-4">
+    <div v-if="!loading && places.length" class="mb-4 d-flex align-center justify-space-between">
       <p class="results-count">
-        Showing {{ places.length }} place{{ places.length === 1 ? '' : 's' }}
+        Showing {{ places.length }} of {{ total }} places
+      </p>
+      <p class="results-count">
+        Page {{ page }} of {{ totalPages }}
       </p>
     </div>
 
@@ -93,6 +96,16 @@
       />
     </transition-group>
 
+    <div v-if="totalPages > 1" class="d-flex justify-center mt-8">
+      <v-pagination
+        v-model="page"
+        :length="totalPages"
+        :total-visible="7"
+        color="primary"
+        rounded="lg"
+        @update:modelValue="goToPage"
+      />
+    </div>
   </v-container>
 </template>
 
@@ -111,6 +124,9 @@ const loading = ref(false);
 const search = ref('');
 const selectedCategory = ref(null);
 const selectedState = ref('');
+const page = ref(1);
+const totalPages = ref(1);
+const total = ref(0);
 
 const fetchPlaces = async () => {
   loading.value = true;
@@ -119,9 +135,13 @@ const fetchPlaces = async () => {
     if (search.value) params.search = search.value;
     if (selectedCategory.value) params.category = selectedCategory.value;
     if (selectedState.value) params.state = selectedState.value;
+    params.page = page.value;
+    params.limit = 24;
 
     const response = await api.get('/places', { params });
     places.value = response.data.places;
+    totalPages.value = response.data.pagination.totalPages;
+    total.value = response.data.pagination.total;
   } catch (err) {
     console.error('Failed to fetch places', err);
   } finally {
@@ -129,14 +149,24 @@ const fetchPlaces = async () => {
   }
 };
 
-const debouncedFetch = debounce(fetchPlaces, 300);
+const goToPage = (p) => {
+  page.value = p;
+  fetchPlaces();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
 const clearFilters = () => {
   search.value = '';
   selectedCategory.value = null;
   selectedState.value = '';
+  page.value = 1;
   fetchPlaces();
 };
+
+const debouncedFetch = debounce(() => {
+  page.value = 1;
+  fetchPlaces();
+}, 300);
 
 const goToPlace = (id) => {
   router.push(`/places/${id}`);

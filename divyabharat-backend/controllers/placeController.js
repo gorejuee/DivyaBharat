@@ -4,22 +4,36 @@ const { Place } = require('@server/db');
 const getAllPlaces = async (req, res) => {
   try {
     const { search, category, state } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 24;
+    const offset = (page - 1) * limit;
+
     const where = {};
 
     if (category) where.category = category;
     if (state) where.state = { [Op.iLike]: `%${state}%` };
     if (search) where.name = { [Op.iLike]: `%${search}%` };
 
-    const places = await Place.findAll({
+    const { count, rows } = await Place.findAndCountAll({
       where,
       attributes: [
         'id', 'name', 'description', 'category',
         'state', 'city', 'latitude', 'longitude', 'image_url'
       ],
-      order: [['name', 'ASC']]
+      order: [['name', 'ASC']],
+      limit,
+      offset
     });
 
-    res.json({ places });
+    res.json({
+      places: rows,
+      pagination: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit)
+      }
+    });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }

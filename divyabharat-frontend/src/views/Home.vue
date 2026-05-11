@@ -226,8 +226,8 @@ const checkReveal = () => {
 
 const fetchFeatured = async () => {
   try {
-    const response = await api.get('/places');
-    featuredPlaces.value = response.data.places.slice(0, 3);
+    const response = await api.get('/places', { params: { limit: 3, page: 1 } });
+    featuredPlaces.value = response.data.places;
   } catch (err) {
     console.error('Failed to fetch featured places', err);
   }

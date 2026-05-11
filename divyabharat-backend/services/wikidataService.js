@@ -5,14 +5,20 @@ const axios = require('axios');
 const SPARQL_ENDPOINT = 'https://query.wikidata.org/sparql';
 
 const CATEGORY_QUERIES = [
-  { instanceOf: 'Q44539', category: 'temple' },    // Hindu temple
-  { instanceOf: 'Q160742', category: 'fort' },      // fort
-  { instanceOf: 'Q35509', category: 'cave' },       // cave
-  { instanceOf: 'Q5753', category: 'ghat' },        // ghat
-  { instanceOf: 'Q1164978', category: 'ashram' },   // ashram
-  { instanceOf: 'Q697295', category: 'gurudwara' }, // gurudwara
-  { instanceOf: 'Q839954', category: 'ancient_site' }, // archaeological site
-  { instanceOf: 'Q3914', category: 'museum' },      // museum
+  { instanceOf: 'Q44539', category: 'temple' },      // Hindu temple
+  { instanceOf: 'Q1457437', category: 'temple' },    // Buddhist temple
+  { instanceOf: 'Q160742', category: 'fort' },        // fort
+  { instanceOf: 'Q57821', category: 'fort' },         // fortification
+  { instanceOf: 'Q2977', category: 'fort' },          // castle
+  { instanceOf: 'Q35509', category: 'cave' },         // cave
+  { instanceOf: 'Q5753', category: 'ghat' },          // ghat
+  { instanceOf: 'Q60184938', category: 'ghat' },      // bathing ghat
+  { instanceOf: 'Q1164978', category: 'ashram' },     // ashram
+  { instanceOf: 'Q6108942', category: 'ashram' },     // hermitage
+  { instanceOf: 'Q697295', category: 'gurudwara' },   // gurudwara
+  { instanceOf: 'Q839954', category: 'ancient_site' },// archaeological site
+  { instanceOf: 'Q3914', category: 'museum' },        // museum
+  { instanceOf: 'Q33506', category: 'museum' },       // museum (broader)
 ];
 
 const buildCategoryQuery = (instanceOf, limit = 500) => `

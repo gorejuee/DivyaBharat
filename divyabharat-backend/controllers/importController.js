@@ -4,7 +4,7 @@ const { Place } = require('@server/db');
 const { fetchFromWikidata } = require('@server/services/wikidataService');
 
 const runImport = async ({ triggeredBy = 'manual' } = {}) => {
-  console.log(`[Wikidata Import] Starting — triggered by: ${triggeredBy}`);
+  console.log(`[Wikidata Import] Starting - triggered by: ${triggeredBy}`);
 
   const places = await fetchFromWikidata();
   console.log(`[Wikidata Import] Fetched ${places.length} total places from Wikidata`);
