@@ -47,6 +47,58 @@
       </v-col>
     </v-row>
 
+    <!-- Region filter -->
+    <div v-if="topStates.length" class="mb-5">
+      <div class="d-flex align-center justify-space-between mb-3">
+        <p class="page-eyebrow">Filter by region</p>
+        <v-btn
+          v-if="selectedState"
+          variant="text"
+          color="primary"
+          size="small"
+          @click="selectState('')"
+        >
+          Clear
+        </v-btn>
+      </div>
+
+      <div class="d-flex flex-wrap ga-2">
+        <v-chip
+          v-for="item in visibleStates"
+          :key="item.state"
+          :variant="selectedState === item.state ? 'flat' : 'tonal'"
+          :color="selectedState === item.state ? 'primary' : 'default'"
+          size="small"
+          class="cursor-pointer"
+          @click="selectState(item.state)"
+        >
+          {{ item.state }}
+        </v-chip>
+
+        <v-chip
+          v-if="!showAllStates && topStates.length > 15"
+          variant="outlined"
+          color="primary"
+          size="small"
+          class="cursor-pointer"
+          @click="showAllStates = true"
+        >
+          +{{ topStates.length - 15 }} more
+        </v-chip>
+
+        <v-chip
+          v-if="showAllStates"
+          variant="outlined"
+          color="primary"
+          size="small"
+          class="cursor-pointer"
+          @click="showAllStates = false"
+        >
+          Show less
+        </v-chip>
+      </div>
+    </div>
+
     <div v-if="!loading && places.length" class="mb-4 d-flex align-center justify-space-between">
       <p class="results-count">
         Showing {{ places.length }} of {{ total }} places
@@ -110,7 +162,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { debounce } from 'lodash';
 import api from '@/services/api';
@@ -127,6 +179,28 @@ const selectedState = ref('');
 const page = ref(1);
 const totalPages = ref(1);
 const total = ref(0);
+const topStates = ref([]);
+const showAllStates = ref(false);
+
+const fetchStates = async () => {
+  try {
+    const response = await api.get('/places/states');
+    topStates.value = response.data.states;
+  } catch (err) {
+    console.error('Failed to fetch states', err);
+  }
+};
+
+const selectState = (state) => {
+  selectedState.value = selectedState.value === state ? '' : state;
+  page.value = 1;
+  fetchPlaces();
+};
+
+const visibleStates = computed(() => {
+  if (showAllStates.value) return topStates.value;
+  return topStates.value.slice(0, 15);
+});
 
 const fetchPlaces = async () => {
   loading.value = true;
@@ -149,11 +223,10 @@ const fetchPlaces = async () => {
   }
 };
 
-const goToPage = (p) => {
-  page.value = p;
+const debouncedFetch = debounce(() => {
+  page.value = 1;
   fetchPlaces();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
+}, 300);
 
 const clearFilters = () => {
   search.value = '';
@@ -163,19 +236,20 @@ const clearFilters = () => {
   fetchPlaces();
 };
 
-const debouncedFetch = debounce(() => {
-  page.value = 1;
+const goToPage = (p) => {
+  page.value = p;
   fetchPlaces();
-}, 300);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
 const goToPlace = (id) => {
   router.push(`/places/${id}`);
 };
 
 onMounted(() => {
-  if (route.query.category) {
-    selectedCategory.value = route.query.category;
-  }
+  if (route.query.category) selectedCategory.value = route.query.category;
+  if (route.query.state) selectedState.value = route.query.state;
+  fetchStates();
   fetchPlaces();
 });
 </script>

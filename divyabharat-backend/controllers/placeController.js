@@ -1,5 +1,6 @@
-const { Op } = require('sequelize');
+const { Op, fn, literal } = require('sequelize');
 const { Place } = require('@server/db');
+const { getWikipediaSummary } = require('@server/services/wikipediaService');
 
 const getAllPlaces = async (req, res) => {
   try {
@@ -151,4 +152,87 @@ const reviewPlace= async (req, res) => {
   }
 };
 
-module.exports = { getAllPlaces, getPlaceById, submitPlace, getPendingPlaces, reviewPlace };
+const getFeaturedPlaces = async (req, res) => {
+  try {
+    const places = await Place.findAll({
+      attributes: [
+        'id', 'name', 'description', 'category',
+        'state', 'city', 'latitude', 'longitude', 'image_url'
+      ],
+      order: literal('RANDOM()'),
+      limit: 3
+    });
+    res.json({ places });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+const getStates = async (req, res) => {
+  try {
+    const results = await Place.findAll({
+      attributes: [
+        'state',
+        [fn('COUNT', literal('*')), 'count']
+      ],
+      group: ['state'],
+      order: [[literal('count'), 'DESC']],
+      raw: true
+    });
+
+    const states = results
+      .map(r => ({ state: r.state, count: parseInt(r.count) }))
+      .filter(r => r.state && r.state !== 'India');
+
+    res.json({ states });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+const getPlaceWithContext = async (req, res) => {
+  try {
+    const place = await Place.findOne({
+      where: { id: req.params.id },
+      attributes: [
+        'id', 'name', 'description', 'history', 'category',
+        'state', 'city', 'latitude', 'longitude', 'image_url',
+        'status', 'wikidata_id'
+      ]
+    });
+
+    if (!place) {
+      return res.status(404).json({ message: 'Place not found' });
+    }
+
+    let description = place.description;
+    if (description) {
+      description = description.charAt(0).toUpperCase() + description.slice(1);
+      if (!description.endsWith('.')) description += '.';
+    }
+
+    const wiki = await getWikipediaSummary(place.name);
+
+    res.json({
+      place: {
+        ...place.toJSON(),
+        description,
+        wiki_extract: wiki?.extract || null,
+        wiki_url: wiki?.wikipediaUrl || null
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+module.exports = {
+  getAllPlaces,
+  getPlaceById,
+  submitPlace,
+  getPendingPlaces,
+  reviewPlace,
+  getFeaturedPlaces,
+  getStates,
+  getPlaceWithContext,
+};

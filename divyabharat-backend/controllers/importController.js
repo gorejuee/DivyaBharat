@@ -23,14 +23,14 @@ const runImport = async ({ triggeredBy = 'manual' } = {}) => {
 
       if (!existing) {
         await Place.create({
-          name: place.name,
-          description: place.description,
+          name: place.name.slice(0, 255),
+          description: place.description ? place.description.slice(0, 500) : null,
           category: place.category,
-          state: place.state,
-          city: place.city,
+          state: place.state.slice(0, 255),
+          city: place.city ? place.city.slice(0, 255) : null,
           latitude: place.latitude,
           longitude: place.longitude,
-          image_url: place.image_url,
+          image_url: place.image_url ? place.image_url.slice(0, 255) : null,
           status: 'approved',
           source: 'wikidata',
           wikidata_id: place.wikidataId
@@ -39,14 +39,14 @@ const runImport = async ({ triggeredBy = 'manual' } = {}) => {
       } else if (existing.source === 'wikidata') {
         await Place.unscoped().update(
           {
-            name: place.name,
-            description: place.description,
+            name: place.name.slice(0, 255),
+            description: place.description ? place.description.slice(0, 500) : null,
             category: place.category,
-            state: place.state,
-            city: place.city,
+            state: place.state.slice(0, 255),
+            city: place.city ? place.city.slice(0, 255) : null,
             latitude: place.latitude,
             longitude: place.longitude,
-            image_url: place.image_url
+            image_url: place.image_url ? place.image_url.slice(0, 255) : null
           },
           { where: { id: existing.id } }
         );

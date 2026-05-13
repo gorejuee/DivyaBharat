@@ -27,20 +27,20 @@
             size="large"
             color="secondary"
             variant="flat"
-            prepend-icon="mdi-compass"
-            to="/places"
+            prepend-icon="mdi-map"
+            to="/map"
             class="mr-3 font-weight-semibold"
           >
-            Start Exploring
+            Explore on Map
           </v-btn>
           <v-btn
             size="large"
             variant="outlined"
-            prepend-icon="mdi-map"
-            to="/map"
+            prepend-icon="mdi-compass"
+            to="/places"
             class="hero-map-btn"
           >
-            View Map
+            Browse Places
           </v-btn>
         </div>
       </div>
@@ -226,7 +226,7 @@ const checkReveal = () => {
 
 const fetchFeatured = async () => {
   try {
-    const response = await api.get('/places', { params: { limit: 3, page: 1 } });
+    const response = await api.get('/places/featured');
     featuredPlaces.value = response.data.places;
   } catch (err) {
     console.error('Failed to fetch featured places', err);

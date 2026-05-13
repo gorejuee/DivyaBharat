@@ -102,7 +102,27 @@
             <v-icon size="18" color="primary" class="mr-2">mdi-information-outline</v-icon>
             <span class="section-label-text">About</span>
           </div>
-          <p class="detail-body mt-3">{{ place.description }}</p>
+
+          <p v-if="place.description" class="detail-body mt-3">
+            {{ place.description }}
+          </p>
+
+          <div v-if="place.wiki_extract" class="mt-3">
+            <p class="detail-body">{{ place.wiki_extract }}</p>
+              <a
+                v-if="place.wiki_url"
+                :href="place.wiki_url"
+                target="_blank"
+                class="text-caption mt-2 d-inline-block"
+                style="color: #B45309;"
+              >
+                Read more on Wikipedia
+              </a>
+          </div>
+
+          <p v-if="!place.description && !place.wiki_extract" class="detail-body mt-3" style="color: #78614A;">
+            No description available yet. Be the first to contribute by submitting details about this place.
+          </p>
         </section>
 
         <!-- History -->
@@ -125,23 +145,26 @@
         <!-- Location -->
         <section v-if="place.latitude && place.longitude" class="mb-10">
           <div class="section-label">
-            <v-icon size="18" color="primary" class="mr-2">mdi-map</v-icon>
+            <v-icon size="18" color="primary" class="mr-2">mdi-map-marker</v-icon>
             <span class="section-label-text">Location</span>
           </div>
-          <v-card variant="outlined" rounded="lg" class="pa-4 mt-3" elevation="0">
-            <p class="text-body-2" style="color: #78614A;">
-              Coordinates: {{ place.latitude }}, {{ place.longitude }}
-            </p>
-            <v-btn
-              class="mt-3"
-              color="primary"
-              variant="tonal"
-              prepend-icon="mdi-google-maps"
-              :href="`https://www.google.com/maps?q=${place.latitude},${place.longitude}`"
-              target="_blank"
-            >
-              Open in Google Maps
-            </v-btn>
+          <v-card variant="outlined" rounded="lg" class="mt-3" elevation="0" style="overflow: hidden;">
+            <div :id="`mini-map-${place.id}`" style="height: 280px; width: 100%; z-index: 0;" />
+            <v-card-text class="py-3 d-flex align-center justify-space-between">
+              <span class="text-body-2" style="color: #78614A;">
+                {{ place.latitude.toFixed(4) }}, {{ place.longitude.toFixed(4) }}
+              </span>
+              <v-btn
+                color="primary"
+                variant="tonal"
+                size="small"
+                prepend-icon="mdi-google-maps"
+                :href="`https://www.google.com/maps?q=${place.latitude},${place.longitude}`"
+                target="_blank"
+              >
+                Open in Google Maps
+              </v-btn>
+            </v-card-text>
           </v-card>
         </section>
 
@@ -255,7 +278,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, computed } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import api from '@/services/api';
@@ -291,7 +314,7 @@ const suggestions = [
 const fetchPlace = async () => {
   loading.value = true;
   try {
-    const response = await api.get(`/places/${route.params.id}`);
+    const response = await api.get(`/places/${route.params.id}/context`);
     place.value = response.data.place;
   } catch (err) {
     console.error('Failed to fetch place', err);
@@ -369,9 +392,56 @@ const askSuggestion = (suggestion) => {
   askQuestion();
 };
 
+let miniMap = null;
+
+const initMiniMap = () => {
+  if (!place.value?.latitude || !place.value?.longitude) return;
+
+  const loadLeaflet = () => {
+    return new Promise((resolve) => {
+      if (window.L) { resolve(); return; }
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = resolve;
+      document.head.appendChild(script);
+    });
+  };
+
+  loadLeaflet().then(() => {
+    const containerId = `mini-map-${place.value.id}`;
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    miniMap = L.map(containerId, { zoomControl: true, scrollWheelZoom: false })
+      .setView([place.value.latitude, place.value.longitude], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(miniMap);
+
+    L.marker([place.value.latitude, place.value.longitude])
+      .addTo(miniMap)
+      .bindPopup(place.value.name)
+      .openPopup();
+  });
+};
+
 onMounted(async () => {
   await fetchPlace();
   await fetchVisitedIds();
+  await nextTick();
+  initMiniMap();
+});
+
+onUnmounted(() => {
+  if (miniMap) {
+    miniMap.remove();
+    miniMap = null;
+  }
 });
 </script>
 

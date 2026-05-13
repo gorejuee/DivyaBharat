@@ -76,7 +76,7 @@
         {{ place.city ? place.city + ', ' : '' }}{{ place.state }}
       </p>
       <p v-if="place.description" class="card-place-desc">
-        {{ place.description.slice(0, 90) }}...
+        {{ place.description ? (place.description.charAt(0).toUpperCase() + place.description.slice(1, 90)) : '' }}...
       </p>
     </v-card-text>
 

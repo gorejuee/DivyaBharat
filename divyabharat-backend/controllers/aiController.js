@@ -1,6 +1,7 @@
 const Groq = require('groq-sdk');
 const crypto = require('crypto');
 const { Place, AiGuideCache } = require('@server/db');
+const { getWikipediaSummary } = require('@server/services/wikipediaService');
 
 const client = new Groq({
   apiKey: process.env.GROQ_API_KEY
@@ -49,18 +50,35 @@ const askGuide = async (req, res) => {
       });
     }
 
-    const systemPrompt = `You are DivyaBharat AI Guide, an expert on Indian heritage, spirituality, history and culture. 
-      You are currently guiding a visitor about ${place.name}, located in ${place.city}, ${place.state}.
+    const wikiContext = await getWikipediaSummary(place.name);
 
-      Here is what we know about this place:
-      Description: ${place.description}
-      History: ${place.history || 'Not available'}
-      Category: ${place.category}
+    const contextLines = [
+      `Name: ${place.name}`,
+      `Location: ${[place.city, place.state].filter(Boolean).join(', ')}`,
+      `Category: ${place.category}`,
+      place.description ? `Description: ${place.description}` : null,
+      place.history ? `Known history: ${place.history}` : null,
+      wikiContext?.extract
+        ? `Additional context (use only verifiable facts from this, avoid contested claims): ${wikiContext.extract}`
+        : null
+    ].filter(Boolean).join('\n');
 
-      Answer the visitor's questions about this place in a warm, knowledgeable and engaging way. 
-      Keep answers concise — 3 to 5 sentences unless the question needs more detail.
-      If the question is completely unrelated to this place or Indian heritage, politely redirect.
-      Always respond in English.`;
+    const systemPrompt = `You are the DivyaBharat AI Guide — a knowledgeable, warm, and respectful companion for exploring India's spiritual and heritage sites.
+
+      You are currently guiding a visitor about ${place.name}.
+
+      Context about this place:
+      ${contextLines}
+
+      Guidelines for your response:
+      - Focus on spiritual significance, architectural beauty, and cultural importance
+      - Stick to well-established, verifiable facts about dates and patrons
+      - Avoid politically contested historical narratives or disputed claims
+      - When history is uncertain or debated, say so honestly rather than stating one version as fact
+      - Speak with reverence for the place, its traditions, and the people who hold it sacred
+      - Keep answers warm and engaging — 3 to 5 sentences unless more detail is genuinely needed
+      - If the question is unrelated to this place or Indian heritage, politely redirect
+      - Always respond in English`;
 
     const completion = await client.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
