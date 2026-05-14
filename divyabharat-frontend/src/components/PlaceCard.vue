@@ -17,36 +17,21 @@
     @mouseleave="onMouseLeave"
   >
     <div class="img-wrap">
+      <div
+        class="img-bg"
+        :style="{ background: gradients[place.category] || gradients.other }"
+      >
+        <v-icon size="40" color="white" class="bg-icon">
+          {{ icons[place.category] || 'mdi-map-marker' }}
+        </v-icon>
+      </div>
+
       <v-img
-        :src="place.image_url"
+        :src="place.image_url || ''"
         height="200"
         cover
-        class="card-img"
-      >
-        <template #placeholder>
-          <div
-            class="d-flex align-center justify-center"
-            :style="{ height: '200px', background: gradients[place.category] || gradients.other }"
-          >
-            <v-icon size="48" color="white" style="opacity: 0.6;">
-              {{ icons[place.category] || 'mdi-map-marker' }}
-            </v-icon>
-          </div>
-        </template>
-        <template #error>
-          <div
-            class="d-flex align-center justify-center flex-column ga-2"
-            :style="{ height: '200px', background: gradients[place.category] || gradients.other }"
-          >
-            <v-icon size="48" color="white" style="opacity: 0.7;">
-              {{ icons[place.category] || 'mdi-map-marker' }}
-            </v-icon>
-            <span class="text-caption text-white" style="opacity: 0.6;">
-              {{ formatCategory(place.category) }}
-            </span>
-          </div>
-        </template>
-      </v-img>
+        class="card-img-overlay"
+      />
 
       <v-chip
         size="x-small"
@@ -76,7 +61,7 @@
         {{ place.city ? place.city + ', ' : '' }}{{ place.state }}
       </p>
       <p v-if="place.description" class="card-place-desc">
-        {{ place.description ? (place.description.charAt(0).toUpperCase() + place.description.slice(1, 90)) : '' }}...
+        {{ place.description.charAt(0).toUpperCase() + place.description.slice(1, 90) }}...
       </p>
     </v-card-text>
 
@@ -134,9 +119,26 @@ const onMouseLeave = () => {
 <style scoped>
 .img-wrap {
   position: relative;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
 }
 
-.card-img {
+.img-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bg-icon {
+  opacity: 0.3;
+}
+
+.card-img-overlay {
+  position: absolute;
+  inset: 0;
   border-radius: 12px 12px 0 0;
 }
 
@@ -144,12 +146,14 @@ const onMouseLeave = () => {
   position: absolute;
   top: 10px;
   left: 10px;
+  z-index: 1;
 }
 
 .visited-chip {
   position: absolute;
   top: 10px;
   right: 10px;
+  z-index: 1;
 }
 
 .card-place-name {

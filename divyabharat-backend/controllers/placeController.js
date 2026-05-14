@@ -21,7 +21,10 @@ const getAllPlaces = async (req, res) => {
         'id', 'name', 'description', 'category',
         'state', 'city', 'latitude', 'longitude', 'image_url'
       ],
-      order: [['name', 'ASC']],
+      order: [
+        literal(`CASE WHEN name ~ '^[0-9]' THEN 1 ELSE 0 END`),
+        ['name', 'ASC']
+      ],
       limit,
       offset
     });
