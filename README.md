@@ -6,15 +6,16 @@ An AI-powered Indian spiritual and heritage travel companion. DivyaBharat helps 
 
 ## Features
 
-- Explore Places - Browse and search heritage sites across India with category and state filters
-- Interactive Map - View all places as color-coded pins on a live map with category filtering
-- AI Guide - Ask anything about a place and get knowledgeable answers powered by Groq and Llama 3.3
+- Explore Places - Browse and search 6000+ real heritage sites across India with category, region, and search filters
+- Interactive Map - View all places on a live map of India with category filtering and marker clustering
+- AI Guide - Ask anything about a place and get knowledgeable answers powered by Groq and Llama 3.3, enriched with Wikipedia context
 - Smart Caching - AI responses are cached in the database so repeated questions return instantly
-- Place Submission - Logged-in users can submit new heritage places for admin review
-- Admin Panel - Admins can approve or reject submitted places before they go live
+- Place Submission - Logged-in users can submit new heritage places with a map picker for coordinates
+- Admin Panel - Admins can approve or reject submissions and trigger Wikidata imports
 - Visited Places - Mark places as visited and track them on your personal profile page
 - Authentication - Register and login with email/password or Google account, session persists across refreshes
 - Role System - User and admin roles with protected routes and server-side middleware
+- Wikidata Sync - Automated daily import of Indian heritage sites from Wikidata with deduplication
 
 ---
 
@@ -25,11 +26,11 @@ An AI-powered Indian spiritual and heritage travel companion. DivyaBharat helps 
 | Technology | Purpose |
 |---|---|
 | Vue 3 + Vite | Frontend framework |
-| Vuetify 3 | UI component library |
+| Vuetify 3 | UI component library with custom warm theme |
 | Pinia | State management with persistence |
 | Vue Router | Client-side routing with navigation guards |
 | Axios | HTTP client with request and response interceptors |
-| Leaflet | Interactive map with custom category markers |
+| Leaflet + MarkerCluster | Interactive map with clustering for large datasets |
 | Lodash | Debounce on search inputs |
 
 ### Backend
@@ -43,6 +44,8 @@ An AI-powered Indian spiritual and heritage travel companion. DivyaBharat helps 
 | JWT + bcryptjs | Authentication and password hashing |
 | Passport + Google OAuth 2.0 | Google login |
 | Groq SDK | AI guide using llama-3.3-70b-versatile |
+| node-cron | Daily Wikidata sync job at 2 AM IST |
+| axios | HTTP client for Wikidata SPARQL and Wikipedia APIs |
 | module-alias | Clean path aliases (@server) |
 | crypto | MD5 hashing for AI response cache keys |
 
@@ -52,6 +55,8 @@ An AI-powered Indian spiritual and heritage travel companion. DivyaBharat helps 
 |---|---|
 | Docker + docker-compose | Containerized backend and database |
 | OpenStreetMap + Nominatim | Free geocoding for place submission map picker |
+| Wikidata SPARQL API | Source of Indian heritage place data |
+| Wikipedia REST API | Contextual summaries for AI guide |
 
 ---
 
@@ -70,15 +75,17 @@ DivyaBharat/
 │       └── utils/
 │
 └── divyabharat-backend/
-    ├── config/
-    ├── controllers/
-    ├── middlewares/
-    ├── migrations/
-    ├── models/
-    ├── routes/
-    ├── seeders/
-    ├── db.js
-    └── server.js
+├── config/
+├── controllers/
+├── jobs/
+├── middlewares/
+├── migrations/
+├── models/
+├── routes/
+├── seeders/
+├── services/
+├── db.js
+└── server.js
 ```
 
 ---
@@ -111,13 +118,15 @@ DivyaBharat/
 | city | STRING | - |
 | latitude | DECIMAL(10,8) | Float getter applied |
 | longitude | DECIMAL(11,8) | Float getter applied |
-| image_url | STRING | - |
+| image_url | STRING | Wikimedia Commons thumbnail URL where available |
 | status | ENUM | pending, approved, rejected - default is pending |
 | submitted_by | UUID | FK to users.id |
+| wikidata_id | STRING | Unique, populated for Wikidata-sourced places |
+| source | ENUM | wikidata, community - default is community |
 | created_at | DATE | Auto |
 | updated_at | DATE | Auto |
 
-Places use a default scope that filters to approved status only. Admin queries use Place.unscoped() to bypass this.
+Places use a default scope that filters to approved status only. Admin queries use Place.unscoped() to bypass this. Community submissions are never overwritten by Wikidata sync.
 
 ### ai_guide_cache
 
@@ -164,8 +173,11 @@ Unique index on (user_id, place_id) prevents duplicate entries.
 
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
-| GET | /api/places | Public | Get approved places, supports ?search, ?category, ?state |
+| GET | /api/places | Public | Get approved places with pagination, search, category, state filters |
+| GET | /api/places/featured | Public | Get 3 random featured places for homepage |
+| GET | /api/places/states | Public | Get all regions with place counts |
 | GET | /api/places/:id | Public | Get single place by ID |
+| GET | /api/places/:id/context | Public | Get place with capitalized description and Wikipedia extract |
 | POST | /api/places/submit | Protected | Submit a new place for review |
 | GET | /api/places/admin/pending | Admin | Get all pending submissions |
 | PATCH | /api/places/:id/review | Admin | Approve or reject a submission |
@@ -184,6 +196,12 @@ Unique index on (user_id, place_id) prevents duplicate entries.
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
 | POST | /api/ai/ask | Protected | Ask the AI guide about a place |
+
+### Admin
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | /api/admin/import-wikidata | Admin | Trigger manual Wikidata import |
 
 ---
 
@@ -253,8 +271,6 @@ npm run dev
 
 **3. Setup the frontend**
 
-Open a new terminal:
-
 ```
 cd divyabharat-frontend
 npm install
@@ -262,6 +278,15 @@ npm run dev
 ```
 
 App runs at http://localhost:5173, backend at http://localhost:3000
+
+**4. Import heritage places (requires internet access, run on first setup)**
+
+Login as admin and click "Import from Wikidata" in the admin panel, or:
+
+```
+curl -X POST http://localhost:3000/api/admin/import-wikidata \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+```
 
 ---
 
@@ -321,27 +346,26 @@ docker-compose down
 
 ### Done
 
-- Project setup and folder structure
+- Project setup, folder structure, and CI conventions
 - JWT authentication and Google OAuth login
 - User role system with admin and user roles
 - Sequelize migrations with UUID primary keys
-- Places database with real seeded heritage sites
-- Places listing with search and filters
-- Interactive map view with Leaflet and color-coded pins
-- Place detail page with AI guide chat
-- AI response caching in database
-- Place submission by logged-in users
+- Place submission with Leaflet map picker and Nominatim geocoding
 - Admin panel to approve and reject submissions
+- Wikidata integration - 5000+ Indian heritage places with daily sync
+- Wikipedia RAG context enriching AI guide responses
+- Places listing with search, category, pagination, and region filter
+- Interactive map with marker clustering showing all places
+- Place detail page with AI guide chat, mini map, and Wikipedia extract
+- AI response caching in database
 - Visited places tracking with personal profile page
 - Docker and docker-compose setup
-- Navbar with auth state, role-based links, and route guards
+- Full UI overhaul - warm saffron theme, Playfair Display typography, 3D card effects
 
 ### Planned
 
-- PostGIS for location-based nearby place discovery
-- Trip planner with itinerary builder
+- Trip planner with AI-generated itineraries and shareable links
 - Personal travel journal
-- Dashboard with widgets
 - Deployment on Render, Vercel, and Supabase
 
 ---
