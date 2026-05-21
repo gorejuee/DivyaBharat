@@ -23,6 +23,7 @@
       <template v-else>
         <v-btn variant="text" color="white" to="/places/submit">Submit</v-btn>
         <v-btn variant="text" color="white" to="/my-places">My Places</v-btn>
+        <v-btn variant="text" color="white" to="/trips">My Trips</v-btn>
         <v-btn v-if="userStore.isAdmin" variant="text" color="secondary" to="/admin/places">
           Admin
         </v-btn>
@@ -51,8 +52,8 @@
 
     <v-main>
       <router-view v-slot="{ Component }">
-        <transition name="page" mode="out-in">
-          <component :is="Component" />
+        <transition name="page" @after-enter="onRouteEnter">
+          <component :is="Component" :key="route.path" />
         </transition>
       </router-view>
     </v-main>
@@ -61,16 +62,23 @@
 
 <script setup>
 import { computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore();
 const router = useRouter();
+const route = useRoute();
 const isLoggedIn = computed(() => !!userStore.token);
 
 const logout = () => {
   userStore.logout();
   router.push('/');
+};
+
+const onRouteEnter = () => {
+  // Dispatch a resize event after the route transition fully completes
+  // so Leaflet (or any map on the new page) can measure the real container size
+  window.dispatchEvent(new Event('resize'));
 };
 </script>
 

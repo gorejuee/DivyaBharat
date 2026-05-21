@@ -118,7 +118,7 @@
           />
         </v-list>
 
-        <div id="location-map" class="mb-3" style="height: 300px; border-radius: 8px; z-index: 0;" />
+        <div ref="locationMapRef" class="mb-3" style="height: 300px; border-radius: 8px; z-index: 0;" />
 
         <v-row>
           <v-col cols="12" md="6">
@@ -201,6 +201,8 @@ import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { debounce } from 'lodash';
 import api from '@/services/api';
 import { CATEGORIES } from '@/utils/placeHelpers';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const EMPTY_FORM = {
   name: '',
@@ -222,12 +224,15 @@ const form = ref({ ...EMPTY_FORM });
 const locationSearch = ref('');
 const locationSuggestions = ref([]);
 const searchLoading = ref(false);
+const locationMapRef = ref(null);
 
 let map = null;
 let marker = null;
 
 const initMap = () => {
-  map = L.map('location-map').setView([22.5937, 78.9629], 5);
+  if (!locationMapRef.value || map) return;
+  if (locationMapRef.value._leaflet_id) locationMapRef.value._leaflet_id = null;
+  map = L.map(locationMapRef.value).setView([22.5937, 78.9629], 5);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
@@ -334,16 +339,9 @@ const handleSubmit = async () => {
   }
 };
 
-onMounted(() => {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-  document.head.appendChild(link);
-
-  const script = document.createElement('script');
-  script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-  script.onload = () => initMap();
-  document.head.appendChild(script);
+onMounted(async () => {
+  await nextTick();
+  initMap();
 });
 
 onUnmounted(() => {

@@ -90,7 +90,7 @@
     </div>
 
     <!-- Map container -->
-    <div id="map-view" style="height: 100%; width: 100%;" />
+    <div ref="mapRef" style="height: 100%; width: 100%;" />
 
     <div
       v-if="loading"
@@ -112,10 +112,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/services/api';
 import { CATEGORIES, formatCategory } from '@/utils/placeHelpers';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 const router = useRouter();
 const places = ref([]);
@@ -124,9 +129,13 @@ const loadingMessage = ref('places...');
 const error = ref(null);
 const selectedCategory = ref(null);
 const filteredCount = ref(0);
+const mapRef = ref(null);
 
 let map = null;
-let clusterGroup = null;
+let markersLayer = null;
+let isUnmounted = false;
+let activeController = null;
+let bootId = 0;
 
 const MARKER_COLORS = {
   temple: '#FF6F00',
@@ -180,9 +189,9 @@ const createPopup = (place) => {
 };
 
 const renderMarkers = (filterCategory = null) => {
-  if (!map || !clusterGroup) return;
+  if (!map || !markersLayer) return;
 
-  clusterGroup.clearLayers();
+  markersLayer.clearLayers();
 
   const toRender = filterCategory
     ? places.value.filter(p => p.category === filterCategory)
@@ -198,7 +207,7 @@ const renderMarkers = (filterCategory = null) => {
 
     const marker = L.marker([lat, lng], { icon: createMarkerIcon(place.category) });
     marker.bindPopup(createPopup(place));
-    clusterGroup.addLayer(marker);
+    markersLayer.addLayer(marker);
     filteredCount.value++;
   });
 };
@@ -207,46 +216,13 @@ const applyFilter = () => {
   renderMarkers(selectedCategory.value || null);
 };
 
-const loadLeafletWithClustering = () => {
-  return new Promise((resolve, reject) => {
-    const loadScript = (src) => new Promise((res, rej) => {
-      if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
-      const s = document.createElement('script');
-      s.src = src;
-      s.onload = res;
-      s.onerror = rej;
-      document.head.appendChild(s);
-    });
-
-    const loadStyle = (href) => {
-      if (document.querySelector(`link[href="${href}"]`)) return;
-      const l = document.createElement('link');
-      l.rel = 'stylesheet';
-      l.href = href;
-      document.head.appendChild(l);
-    };
-
-    if (window.L) {
-      loadStyle('https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css');
-      loadStyle('https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css');
-      loadScript('https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js')
-        .then(resolve).catch(reject);
-      return;
-    }
-
-    loadStyle('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
-    loadStyle('https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css');
-    loadStyle('https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css');
-
-    loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js')
-      .then(() => loadScript('https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js'))
-      .then(resolve)
-      .catch(reject);
-  });
-};
-
 const initMap = () => {
-  map = L.map('map-view', {
+  if (!mapRef.value || map) return;
+  // In fast route transitions, stale container metadata can survive briefly.
+  if (mapRef.value._leaflet_id) {
+    mapRef.value._leaflet_id = null;
+  }
+  map = L.map(mapRef.value, {
     center: [22.5937, 78.9629],
     zoom: 5,
     zoomControl: true
@@ -257,52 +233,64 @@ const initMap = () => {
     maxZoom: 18
   }).addTo(map);
 
-  // cluster group with custom styling matching our warm theme
-  clusterGroup = L.markerClusterGroup({
-    maxClusterRadius: 60,
-    spiderfyOnMaxZoom: true,
-    showCoverageOnHover: false,
-    zoomToBoundsOnClick: true,
-    iconCreateFunction: (cluster) => {
-      const count = cluster.getChildCount();
-      const size = count < 10 ? 36 : count < 100 ? 44 : 52;
-      const color = count < 10 ? '#D97706' : count < 100 ? '#B45309' : '#92400E';
-      return L.divIcon({
-        html: `<div style="
-          background: ${color};
-          color: white;
-          border-radius: 50%;
-          width: ${size}px;
-          height: ${size}px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: 'Playfair Display', serif;
-          font-weight: 700;
-          font-size: ${count < 100 ? '14' : '12'}px;
-          border: 2px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        ">${count}</div>`,
-        className: '',
-        iconSize: [size, size],
-        iconAnchor: [size / 2, size / 2]
-      });
-    }
-  });
+  if (typeof L.markerClusterGroup === 'function') {
+    markersLayer = L.markerClusterGroup({
+      maxClusterRadius: 60,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true,
+      iconCreateFunction: (cluster) => {
+        const count = cluster.getChildCount();
+        const size = count < 10 ? 36 : count < 100 ? 44 : 52;
+        const color = count < 10 ? '#D97706' : count < 100 ? '#B45309' : '#92400E';
+        return L.divIcon({
+          html: `<div style="
+            background: ${color};
+            color: white;
+            border-radius: 50%;
+            width: ${size}px;
+            height: ${size}px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: ${count < 100 ? '14' : '12'}px;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          ">${count}</div>`,
+          className: '',
+          iconSize: [size, size],
+          iconAnchor: [size / 2, size / 2]
+        });
+      }
+    });
+  } else {
+    // Fallback: still render all places even if cluster plugin is unavailable.
+    markersLayer = L.layerGroup();
+  }
 
-  map.addLayer(clusterGroup);
+  map.addLayer(markersLayer);
   renderMarkers();
 };
 
 const fetchAllPlaces = async () => {
+  if (activeController) activeController.abort();
+  const controller = new AbortController();
+  activeController = controller;
+
   loading.value = true;
   loadingMessage.value = 'heritage sites...';
   error.value = null;
 
   try {
     // fetch all places in batches
-    const firstResponse = await api.get('/places', { params: { limit: 500, page: 1 } });
+    const firstResponse = await api.get('/places', {
+      params: { limit: 500, page: 1 },
+      signal: controller.signal
+    });
     const { pagination } = firstResponse.data;
+    if (controller.signal.aborted || isUnmounted) return false;
     places.value = firstResponse.data.places;
 
     loadingMessage.value = `${places.value.length} of ${pagination.total} places...`;
@@ -310,35 +298,57 @@ const fetchAllPlaces = async () => {
     // fetch remaining pages
     const totalPages = pagination.totalPages;
     for (let p = 2; p <= totalPages; p++) {
-      const response = await api.get('/places', { params: { limit: 500, page: p } });
+      const response = await api.get('/places', {
+        params: { limit: 500, page: p },
+        signal: controller.signal
+      });
+      if (controller.signal.aborted || isUnmounted) return false;
       places.value = [...places.value, ...response.data.places];
       loadingMessage.value = `${places.value.length} of ${pagination.total} places...`;
     }
+    return true;
   } catch (err) {
+    if (err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED' || controller.signal.aborted) {
+      return false;
+    }
     console.error('Failed to fetch places for map', err);
     error.value = 'Failed to load places. Please try again.';
+    return false;
   } finally {
+    if (activeController === controller) activeController = null;
     loading.value = false;
   }
 };
 
 onMounted(async () => {
+  isUnmounted = false;
+  const thisBoot = ++bootId;
   try {
-    await loadLeafletWithClustering();
-    await fetchAllPlaces();
+    const ok = await fetchAllPlaces();
+    if (!ok || isUnmounted || thisBoot !== bootId) return;
+    await nextTick();
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     initMap();
+    if (!map || isUnmounted || thisBoot !== bootId) return;
+    map.invalidateSize({ animate: false, pan: false });
   } catch (err) {
-    console.error(err.message);
+    console.error('MapView init failed', err);
     error.value = 'Map failed to load. Please refresh the page.';
     loading.value = false;
   }
 });
 
 onUnmounted(() => {
+  isUnmounted = true;
+  bootId++;
+  if (activeController) {
+    activeController.abort();
+    activeController = null;
+  }
   if (map) {
     map.remove();
     map = null;
-    clusterGroup = null;
+    markersLayer = null;
   }
 });
 </script>

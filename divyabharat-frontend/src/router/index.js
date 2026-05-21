@@ -11,6 +11,8 @@ import AdminPlaces from '@/views/AdminPlaces.vue';
 import MyPlaces from '@/views/MyPlaces.vue';
 import AuthCallback from '@/views/AuthCallback.vue';
 import MapView from '@/views/MapView.vue';
+import MyTrips from '@/views/MyTrips.vue';
+import TripDetail from '@/views/TripDetail.vue';
 
 const routes = [
   { path: '/', component: Home },
@@ -23,12 +25,17 @@ const routes = [
   { path: '/my-places', component: MyPlaces },
   { path: '/auth/callback', component: AuthCallback },
   { path: '/map', component: MapView },
+  { path: '/trips', component: MyTrips, meta: { requiresAuth: true } },
+  { path: '/trips/:id', component: TripDetail, meta: { requiresAuth: true } },
   { path: '/places/:id', component: PlaceDetail },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+  scrollBehavior() {
+    return { top: 0 };
+  },
 });
 
 router.beforeEach((to) => {
@@ -39,9 +46,15 @@ router.beforeEach((to) => {
     return '/places';
   }
 
+  if (to.meta.requiresAuth && !isLoggedIn) {
+    return '/login';
+  }
+
   if (to.meta.requiresAdmin && !userStore.isAdmin) {
     return '/';
   }
+
+  return true;
 });
 
 export default router;

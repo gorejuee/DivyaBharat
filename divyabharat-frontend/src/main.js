@@ -6,11 +6,12 @@ import router from './router';
 import { createVuetify } from 'vuetify';
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
+import { VDateInput } from 'vuetify/labs/VDateInput';
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
 
 const vuetify = createVuetify({
-  components,
+  components: { ...components, VDateInput },
   directives,
   theme: {
     defaultTheme: 'divyaBharatTheme',

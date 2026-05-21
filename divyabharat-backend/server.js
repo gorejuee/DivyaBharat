@@ -13,6 +13,7 @@ const placesRoutes = require('@server/routes/places');
 const aiRoutes = require('@server/routes/ai');
 const visitsRoutes = require('@server/routes/visits');
 const adminRoutes = require('@server/routes/admin');
+const tripsRoutes = require('@server/routes/trips');
 const { startWikidataSync } = require('@server/jobs/wikidataSync');
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/api/places', placesRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/visits', visitsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/trips', tripsRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' })
