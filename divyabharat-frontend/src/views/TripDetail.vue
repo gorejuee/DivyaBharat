@@ -823,7 +823,7 @@ onUnmounted(() => {
   padding: 3px 9px;
 }
 
-/* Add Stop button — full width, warm primary */
+/* Add Stop button - full width, warm primary */
 .td-add-stop-btn {
   display: flex;
   align-items: center;

@@ -136,7 +136,7 @@ const fetchFromWikidata = async () => {
       const bindings = await querySparql(query);
 
       if (bindings.length === 0) {
-        console.log('[Wikidata] No more results — fetch complete');
+        console.log('[Wikidata] No more results - fetch complete');
         hasMore = false;
         break;
       }
@@ -169,7 +169,7 @@ const fetchFromWikidata = async () => {
         await sleep(waitMs);
         // retry same offset
       } else if (consecutiveErrors >= 3) {
-        console.error('[Wikidata] Too many consecutive errors — stopping fetch');
+        console.error('[Wikidata] Too many consecutive errors - stopping fetch');
         hasMore = false;
       } else {
         await sleep(10000);
@@ -177,7 +177,7 @@ const fetchFromWikidata = async () => {
     }
   }
 
-  console.log(`[Wikidata] Fetch complete — ${allPlaces.length} total valid places`);
+  console.log(`[Wikidata] Fetch complete - ${allPlaces.length} total valid places`);
   return allPlaces;
 };
 

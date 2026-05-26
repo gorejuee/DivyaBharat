@@ -1,18 +1,92 @@
+/* ============================================================
+   DivyaBharat Design System
+   ============================================================ */
+
+:root {
+  --db-bg:        #160D06;
+  --db-surface:   #211209;
+  --db-surface-2: #2D180B;
+  --db-surface-3: #3A1E0D;
+
+  /* Borders */
+  --db-border:        rgba(200, 134, 30, 0.14);
+  --db-border-strong: rgba(200, 134, 30, 0.32);
+
+  /* Gold palette */
+  --db-gold:        #C8861E;
+  --db-gold-bright: #EAA030;
+  --db-gold-muted:  rgba(200, 134, 30, 0.38);
+  --db-gold-subtle: rgba(200, 134, 30, 0.08);
+
+  /* Accent surfaces */
+  --db-peacock:  rgba(12, 55, 70, 0.7);
+  --db-crimson:  rgba(60, 14, 8, 0.7);
+
+  /* Text */
+  --db-text:       #EDE3CE;
+  --db-text-muted: #A08C72;
+  --db-text-faint: #5A4430;
+
+  /* Fonts */
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-label:   'Rajdhani', sans-serif;
+  --font-body:    'Inter', sans-serif;
+
+  /* Transitions */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- Base ---- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--db-bg);
 }
 
-/* Page transitions - Vue transition classes, CSS only */
+body {
+  background: var(--db-bg);
+  color: var(--db-text);
+  font-family: var(--font-body);
+}
+
+/* Make Vuetify app background dark */
+.v-application {
+  background: var(--db-bg) !important;
+  color: var(--db-text) !important;
+}
+
+.v-main {
+  background: var(--db-bg) !important;
+}
+
+/* ---- Typography utilities ---- */
+.font-display {
+  font-family: var(--font-display) !important;
+}
+
+.font-playfair {
+  font-family: var(--font-heading), Georgia, serif !important;
+}
+
+.font-label {
+  font-family: var(--font-label) !important;
+}
+
+/* ---- Page transitions ---- */
 .page-enter-active,
 .page-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.3s ease, transform 0.3s var(--ease-out);
 }
 
 .page-enter-from {
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(16px);
 }
 
 .page-leave-to {
@@ -20,11 +94,11 @@ html {
   transform: translateY(-8px);
 }
 
-/* Scroll reveal - toggled by JS adding .visible class */
+/* ---- Scroll reveal ---- */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(28px);
+  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
 }
 
 .reveal.visible {
@@ -32,19 +106,81 @@ html {
   transform: translateY(0);
 }
 
-/* Typography utility */
-.font-playfair {
-  font-family: 'Playfair Display', Georgia, serif !important;
+/* ---- Mandala divider ---- */
+.mandala-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 auto;
+  padding: 8px 0;
+  width: 100%;
+  max-width: 320px;
 }
 
-/* Hero bounce animation */
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(6px); }
+.mandala-divider::before,
+.mandala-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--db-gold-muted));
 }
 
-/* Hero float animation */
+.mandala-divider::after {
+  background: linear-gradient(to left, transparent, var(--db-gold-muted));
+}
+
+.mandala-center {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.mandala-center::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--db-gold-muted);
+  border-radius: 50%;
+  transform: rotate(45deg);
+}
+
+.mandala-center::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid var(--db-gold-muted);
+  border-radius: 50%;
+}
+
+/* ---- Keyframes ---- */
+@keyframes goldPulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--db-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--db-gold-muted);
+  border-radius: 4px;
 }

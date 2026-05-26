@@ -61,7 +61,7 @@ const runImport = async ({ triggeredBy = 'manual' } = {}) => {
   }
 
   const summary = { inserted, updated, skipped, errors, total: places.length };
-  console.log(`[Wikidata Import] Done —`, summary);
+  console.log(`[Wikidata Import] Done -`, summary);
   return summary;
 };
 

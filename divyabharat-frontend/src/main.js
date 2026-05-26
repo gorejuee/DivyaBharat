@@ -9,6 +9,7 @@ import * as directives from 'vuetify/directives';
 import { VDateInput } from 'vuetify/labs/VDateInput';
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
+import './style.css';
 
 const vuetify = createVuetify({
   components: { ...components, VDateInput },
@@ -17,20 +18,20 @@ const vuetify = createVuetify({
     defaultTheme: 'divyaBharatTheme',
     themes: {
       divyaBharatTheme: {
-        dark: false,
+        dark: true,
         colors: {
-          primary: '#B45309',
-          secondary: '#D97706',
-          accent: '#F59E0B',
-          background: '#FDF8F0',
-          surface: '#FFF8ED',
-          error: '#DC2626',
-          success: '#15803D',
-          warning: '#D97706',
-          info: '#1D4ED8',
-          'on-primary': '#FFFFFF',
-          'on-background': '#2C1810',
-          'on-surface': '#2C1810',
+          primary:        '#C8861E',
+          secondary:      '#E8A020',
+          accent:         '#F0B93A',
+          background:     '#09060A',
+          surface:        '#120D0A',
+          error:          '#DC2626',
+          success:        '#22C55E',
+          warning:        '#E8A020',
+          info:           '#60A5FA',
+          'on-primary':   '#09060A',
+          'on-background':'#EDE3CE',
+          'on-surface':   '#EDE3CE',
         }
       }
     }

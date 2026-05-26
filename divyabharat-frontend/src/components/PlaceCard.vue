@@ -1,89 +1,62 @@
 <template>
-  <v-card
-    elevation="0"
-    rounded="lg"
-    :style="{
-      border: '1px solid rgba(180,83,9,0.1)',
-      background: '#FFFBF4',
-      cursor: 'pointer',
-      height: '100%',
-      transition: 'transform 0.25s ease, box-shadow 0.25s ease',
-      transformStyle: 'preserve-3d',
-      transform: `perspective(800px) rotateX(${tiltY}deg) rotateY(${tiltX}deg) translateY(${hovered ? -4 : 0}px)`,
-      boxShadow: hovered ? '0 16px 40px rgba(44,24,16,0.14)' : '0 1px 4px rgba(44,24,16,0.06)'
-    }"
+  <div
+    class="place-card"
+    :style="{ transform: `perspective(800px) rotateX(${tiltY}deg) rotateY(${tiltX}deg)` }"
     @click="$emit('click')"
     @mousemove="onMouseMove"
     @mouseleave="onMouseLeave"
   >
-    <div class="img-wrap">
+    <div class="pc-img-wrap">
+
+      <!-- Gradient placeholder - shown when no image or image fails -->
       <div
-        class="img-bg"
+        v-if="!place.image_url || imgFailed"
+        class="pc-no-img"
         :style="{ background: gradients[place.category] || gradients.other }"
       >
-        <v-icon size="40" color="white" class="bg-icon">
+        <div class="pc-no-img-veil" />
+        <v-icon class="pc-no-img-icon" size="48">
           {{ icons[place.category] || 'mdi-map-marker' }}
         </v-icon>
       </div>
 
-      <v-img
-        :src="place.image_url || ''"
-        height="200"
-        cover
-        class="card-img-overlay"
+      <!-- Actual image - hidden on error, replaced by typographic card above -->
+      <img
+        v-else
+        :src="place.image_url"
+        :alt="place.name"
+        class="pc-img"
+        @error="imgFailed = true"
       />
 
-      <v-chip
-        size="x-small"
-        variant="flat"
-        :color="categoryColor(place.category)"
-        class="category-chip"
-      >
-        {{ formatCategory(place.category) }}
-      </v-chip>
+      <div class="pc-img-veil" />
 
-      <v-chip
-        v-if="showVisited"
-        size="x-small"
-        variant="flat"
-        color="success"
-        prepend-icon="mdi-check-circle"
-        class="visited-chip"
-      >
-        Visited
-      </v-chip>
+      <span class="pc-cat-badge font-label">{{ formatCategory(place.category) }}</span>
+      <span v-if="showVisited" class="pc-visited-badge font-label">
+        <v-icon size="11">mdi-check-circle</v-icon> Visited
+      </span>
     </div>
 
-    <v-card-text class="pb-2 pt-3">
-      <p class="font-playfair card-place-name">{{ place.name }}</p>
-      <p class="card-place-location">
-        <v-icon size="12" color="primary">mdi-map-marker</v-icon>
+    <div class="pc-body">
+      <p class="pc-location font-label">
+        <v-icon size="11" style="color: var(--db-gold); margin-right: 3px;">mdi-map-marker</v-icon>
         {{ place.city ? place.city + ', ' : '' }}{{ place.state }}
       </p>
-      <p v-if="place.description" class="card-place-desc">
-        {{ place.description.charAt(0).toUpperCase() + place.description.slice(1, 90) }}...
+      <h3 class="pc-name font-display">{{ place.name }}</h3>
+      <p v-if="place.description" class="pc-desc font-body">
+        {{ place.description.charAt(0).toUpperCase() + place.description.slice(1, 85) }}...
       </p>
-    </v-card-text>
+    </div>
 
-    <v-card-actions class="pt-0 px-4 pb-3">
-      <v-spacer />
-      <v-btn
-        variant="text"
-        color="primary"
-        size="small"
-        append-icon="mdi-arrow-right"
-        class="text-caption"
-      >
-        Explore
-      </v-btn>
-    </v-card-actions>
-  </v-card>
+    <div class="pc-footer">
+      <span class="pc-cta font-label">Explore &rarr;</span>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import {
-  categoryColor,
   formatCategory,
   categoryGradients as gradients,
   categoryIcons as icons
@@ -96,35 +69,53 @@ defineProps({
 
 defineEmits(['click']);
 
-const hovered = ref(false);
+const imgFailed = ref(false);
 const tiltX = ref(0);
 const tiltY = ref(0);
 
 const onMouseMove = (e) => {
-  hovered.value = true;
   const rect = e.currentTarget.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  tiltX.value = ((x - rect.width / 2) / (rect.width / 2)) * 5;
-  tiltY.value = -((y - rect.height / 2) / (rect.height / 2)) * 5;
+  tiltX.value = ((e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)) * 4;
+  tiltY.value = -((e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)) * 4;
 };
 
 const onMouseLeave = () => {
-  hovered.value = false;
   tiltX.value = 0;
   tiltY.value = 0;
 };
 </script>
 
 <style scoped>
-.img-wrap {
-  position: relative;
-  height: 200px;
+.place-card {
+  background: var(--db-surface);
+  border: 1px solid var(--db-border);
+  border-radius: 12px;
   overflow: hidden;
-  border-radius: 12px 12px 0 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  /* translate = lift (CSS :hover, instant) | transform = tilt (JS, slow) */
+  transition: translate 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, transform 0.38s ease;
+  transform-style: preserve-3d;
+}
+.place-card:hover {
+  translate: 0 -6px;
+  box-shadow: 0 24px 56px rgba(0,0,0,0.6);
+  border-color: rgba(200,134,30,0.3);
 }
 
-.img-bg {
+/* ---- Image area ---- */
+.pc-img-wrap {
+  position: relative;
+  height: 188px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Typographic editorial placeholder when no image */
+.pc-no-img {
   position: absolute;
   inset: 0;
   display: flex;
@@ -132,49 +123,116 @@ const onMouseLeave = () => {
   justify-content: center;
 }
 
-.bg-icon {
-  opacity: 0.3;
-}
-
-.card-img-overlay {
+.pc-no-img-veil {
   position: absolute;
   inset: 0;
-  border-radius: 12px 12px 0 0;
+  background: rgba(22,13,6,0.38);
 }
 
-.category-chip {
+.pc-no-img-icon {
+  position: relative;
+  z-index: 1;
+  color: rgba(255,255,255,0.22) !important;
+}
+
+/* Actual image */
+.pc-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.place-card:hover .pc-img { transform: scale(1.05); }
+
+.pc-img-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(22,13,6,0.65) 100%);
+  pointer-events: none;
+}
+
+.pc-cat-badge {
   position: absolute;
   top: 10px;
   left: 10px;
-  z-index: 1;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--db-bg);
+  background: var(--db-gold);
+  padding: 3px 9px;
+  border-radius: 4px;
+  z-index: 2;
 }
 
-.visited-chip {
+.pc-visited-badge {
   position: absolute;
   top: 10px;
   right: 10px;
-  z-index: 1;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #4ade80;
+  background: rgba(22,163,74,0.18);
+  border: 1px solid rgba(74,222,128,0.3);
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  z-index: 2;
 }
 
-.card-place-name {
-  font-size: 1.05rem;
+/* ---- Body ---- */
+.pc-body {
+  padding: 14px 16px 8px;
+  flex: 1;
+}
+
+.pc-location {
+  font-size: 0.62rem;
   font-weight: 600;
-  color: #2C1810;
-  margin-bottom: 4px;
-  line-height: 1.3;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--db-gold);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
 }
 
-.card-place-location {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.78rem;
-  color: #B45309;
+.pc-name {
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: var(--db-text);
+  line-height: 1.25;
   margin-bottom: 8px;
 }
 
-.card-place-desc {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.85rem;
-  color: #78614A;
+.pc-desc {
+  font-size: 0.82rem;
+  color: var(--db-text-muted);
   line-height: 1.6;
 }
+
+/* ---- Footer ---- */
+.pc-footer {
+  padding: 10px 16px 14px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--db-border);
+}
+
+.pc-cta {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--db-gold-bright);
+  transition: color 0.2s;
+}
+.place-card:hover .pc-cta { color: var(--db-text); }
 </style>
