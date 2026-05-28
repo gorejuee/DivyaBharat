@@ -321,6 +321,8 @@ const clearFilters = () => {
 
 const goToPage = (p) => {
   page.value = p;
+  // Persist page in URL so router.back() from PlaceDetail restores it
+  router.replace({ query: { ...route.query, page: p === 1 ? undefined : p } });
   fetchPlaces();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
@@ -335,6 +337,7 @@ const goToPlace = (id) => router.push(`/places/${id}`);
 onMounted(() => {
   if (route.query.category) selectedCategory.value = route.query.category;
   if (route.query.state)    selectedState.value = route.query.state;
+  if (route.query.page)     page.value = parseInt(route.query.page) || 1;
   fetchStates();
   fetchPlaces();
   // initialise arrow state after DOM renders

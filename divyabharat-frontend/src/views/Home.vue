@@ -85,9 +85,26 @@
 
         <!-- Persistent across all four portals -->
         <div class="stage-scroll-hint">
-          <span class="stage-hint-line" />
-          <span class="font-label stage-hint-label">Scroll to discover</span>
-          <span class="stage-hint-line" />
+          <template v-if="activePortalIdx === 0">
+            <span class="stage-hint-line" />
+            <span class="font-label stage-hint-label">Scroll to discover</span>
+            <span class="stage-hint-line" />
+          </template>
+          <template v-else>
+            <svg
+              class="stage-scroll-arrow"
+              viewBox="0 0 28 36" width="28" height="36" fill="none"
+              style="cursor:pointer;"
+              @click="scrollPortalForward"
+            >
+              <polyline points="4,4 14,16 24,4"
+                stroke="rgba(200,134,30,0.85)" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="4,16 14,28 24,16"
+                stroke="rgba(200,134,30,0.45)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </template>
         </div>
 
       </div>
@@ -147,7 +164,7 @@
             <p class="feat-state font-label">{{ place.state }}</p>
             <h3 class="feat-name font-display">{{ place.name }}</h3>
             <p class="feat-desc font-body" v-if="place.description">
-              {{ place.description.slice(0, 90) }}...
+              {{ (place.description.charAt(0).toUpperCase() + place.description.slice(1)).slice(0, 90) }}...
             </p>
             <span class="feat-cta font-label">Explore &rarr;</span>
           </div>
@@ -198,6 +215,7 @@ import api from '@/services/api';
 
 const router = useRouter();
 const featuredPlaces = ref([]);
+const activePortalIdx = ref(0);
 
 const MandalaLine = defineComponent({
   render() {
@@ -277,6 +295,18 @@ const handleScroll = () => {
   updatePortals();
 };
 
+const scrollPortalForward = () => {
+  const portalsCount = document.querySelectorAll('.full-portal').length;
+  if (activePortalIdx.value >= portalsCount - 1) {
+    // Last portal - jump past the entire portals section
+    const wrap = document.querySelector('.portals-wrap');
+    if (wrap) window.scrollTo({ top: wrap.offsetTop + wrap.offsetHeight, behavior: 'smooth' });
+  } else {
+    // Each portal = one viewport height of scroll distance
+    window.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
+  }
+};
+
 const updatePortals = () => {
   const wrap = document.querySelector('.portals-wrap');
   if (!wrap) return;
@@ -299,6 +329,7 @@ const updatePortals = () => {
       el.classList.add('active');
     }
   });
+  activePortalIdx.value = activeIdx;
 };
 
 onMounted(() => {
@@ -331,7 +362,7 @@ onUnmounted(() => {
 .db-btn {
   display: inline-flex;
   align-items: center;
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-label);
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.8px;
@@ -466,7 +497,10 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
   gap: 14px;
-  pointer-events: none;
+  pointer-events: none; /* text hint: not clickable */
+}
+.stage-scroll-hint .stage-scroll-arrow {
+  pointer-events: auto; /* arrow only: clickable */
 }
 .stage-hint-line {
   width: 44px;
@@ -479,6 +513,13 @@ onUnmounted(() => {
   text-transform: uppercase;
   color: var(--db-text-muted);
   white-space: nowrap;
+}
+.stage-scroll-arrow {
+  animation: stageArrowBob 2s ease-in-out infinite;
+}
+@keyframes stageArrowBob {
+  0%, 100% { transform: translateY(0);   opacity: 0.65; }
+  50%       { transform: translateY(9px); opacity: 1;    }
 }
 
 /* ---- Directional gradient veils ---- */
@@ -915,7 +956,7 @@ onUnmounted(() => {
 .footer-copy  { font-size: 0.85rem; color: var(--db-text-muted); flex: 1; min-width: 140px; }
 .footer-links { display: flex; gap: 18px; }
 .footer-links a {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-label);
   font-size: 0.88rem;
   font-weight: 500;
   color: var(--db-text-muted);
