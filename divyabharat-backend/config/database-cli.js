@@ -1,12 +1,12 @@
 require('dotenv').config();
 
-module.exports = {
-  development: {
-    username: process.env.DB_USER || 'sacredpath_user',
-    password: process.env.DB_PASSWORD || '12345',
-    database: process.env.DB_NAME || 'divyabharat_db',
-    host: process.env.DB_HOST || 'localhost',
-    dialect: 'postgres',
-    logging: false
-  }
+const base = {
+  dialect: 'postgres',
+  logging: false
 };
+
+const config = process.env.DATABASE_URL
+  ? { ...base, url: process.env.DATABASE_URL, dialectOptions: { ssl: { require: true, rejectUnauthorized: false } } }
+  : { ...base, username: process.env.DB_USER, password: process.env.DB_PASSWORD, database: process.env.DB_NAME, host: process.env.DB_HOST };
+
+module.exports = { development: config, production: config };
