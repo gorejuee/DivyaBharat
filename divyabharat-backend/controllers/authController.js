@@ -88,11 +88,11 @@ const googleCallback = (req, res) => {
       role: user.role
     }));
 
-    res.redirect(
-      `http://localhost:5173/auth/callback?token=${token}&user=${userData}`
-    );
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}/auth/callback?token=${token}&user=${userData}`);
   } catch (err) {
-    res.redirect('http://localhost:5173/login?error=oauth_failed');
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}/login?error=oauth_failed`);
   }
 };
 
