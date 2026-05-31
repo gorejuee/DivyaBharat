@@ -22,7 +22,7 @@ onMounted(() => {
     try {
       const parsedUser = JSON.parse(decodeURIComponent(user));
       userStore.setUser(parsedUser, token);
-      router.push('/places');
+      router.push('/');
     } catch {
       router.push('/login?error=oauth_failed');
     }

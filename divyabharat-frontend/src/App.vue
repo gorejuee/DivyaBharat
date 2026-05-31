@@ -112,7 +112,7 @@
     <!-- Page content -->
     <v-main class="db-main">
       <router-view v-slot="{ Component }">
-        <transition name="page" @after-enter="onRouteEnter">
+        <transition name="page" mode="out-in" @after-enter="onRouteEnter">
           <component :is="Component" :key="route.path" />
         </transition>
       </router-view>
@@ -554,6 +554,18 @@ const onRouteEnter = () => {
 /* ---- Main content offset ---- */
 .db-main {
   padding-top: 80px !important;
+}
+
+/* ---- Page route transition ---- */
+.page-leave-active {
+  transition: opacity 0.18s ease;
+}
+.page-enter-active {
+  transition: opacity 0.28s ease;
+}
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
 }
 
 /* ---- Mobile drawer transition ---- */

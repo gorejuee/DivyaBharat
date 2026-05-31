@@ -145,7 +145,7 @@
       </div>
       <h3 class="empty-title font-display">No places found</h3>
       <p class="empty-sub font-body">Try a different search or filter</p>
-      <button class="empty-reset font-label" @click="clearFilters">Reset all filters</button>
+      <button v-if="hasActiveFilter" class="empty-reset font-label" @click="clearFilters">Reset all filters</button>
     </div>
 
     <!-- PLACES GRID -->
@@ -251,6 +251,10 @@ const scrollCats = (dir) => {
   if (!el) return;
   el.scrollBy({ left: dir * 200, behavior: 'smooth' });
 };
+
+const hasActiveFilter = computed(() =>
+  !!search.value || !!selectedCategory.value || !!selectedState.value
+);
 
 const filteredRegions = computed(() => {
   if (!regionSearch.value) return topStates.value;
