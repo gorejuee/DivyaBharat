@@ -1,4 +1,6 @@
 <template>
+  <div>
+
   <!-- Loading -->
   <div v-if="loading" class="td-loading">
     <v-progress-circular indeterminate color="primary" size="52" />
@@ -228,6 +230,8 @@
     </v-dialog>
 
   </div>
+
+  </div>
 </template>
 
 <script setup>
@@ -242,7 +246,6 @@ const tripsStore = useTripsStore();
 
 const loading = ref(true);
 const hoveredStop = ref(null);
-const scrollRef = ref(null);
 const mapRef = ref(null);
 const panelRef = ref(null);
 
