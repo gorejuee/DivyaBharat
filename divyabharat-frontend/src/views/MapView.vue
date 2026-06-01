@@ -43,7 +43,7 @@
 
     <!-- Stats badge (top-right) -->
     <div class="mv-stats">
-      <span class="mv-stats-num font-display">{{ places.length.toLocaleString() }}</span>
+      <span class="mv-stats-num font-display">{{ placesStore.places.length.toLocaleString() }}</span>
       <span class="mv-stats-label font-label">Heritage Sites</span>
     </div>
 
@@ -51,17 +51,17 @@
     <div ref="mapRef" class="mv-map" />
 
     <!-- Loading overlay -->
-    <div v-if="loading" class="mv-loading">
+    <div v-if="placesStore.loading" class="mv-loading">
       <svg class="mv-spinner" viewBox="0 0 80 80" fill="none">
         <circle cx="40" cy="40" r="30" stroke="rgba(200,134,30,0.15)" stroke-width="1.5"/>
         <circle cx="40" cy="40" r="30" stroke="var(--db-gold)" stroke-width="1.5"
           stroke-dasharray="48 144" stroke-linecap="round"/>
       </svg>
-      <p class="mv-loading-label font-label">{{ loadingMessage }}</p>
+      <p class="mv-loading-label font-label">{{ placesStore.loadingMessage }}</p>
     </div>
 
     <!-- Error -->
-    <div v-if="error" class="mv-error font-body">{{ error }}</div>
+    <div v-if="placesStore.error" class="mv-error font-body">{{ placesStore.error }}</div>
 
   </div>
 </template>
@@ -69,7 +69,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import api from '@/services/api';
+import { usePlacesStore } from '@/stores/places';
 import { formatCategory } from '@/utils/placeHelpers';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -78,10 +78,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 const router = useRouter();
-const places = ref([]);
-const loading = ref(false);
-const loadingMessage = ref('heritage sites...');
-const error = ref(null);
+const placesStore = usePlacesStore();
 const selectedCategory = ref(null);
 const filteredCount = ref(0);
 const mapRef = ref(null);
@@ -89,8 +86,6 @@ const mapRef = ref(null);
 let map = null;
 let markersLayer = null;
 let isUnmounted = false;
-let activeController = null;
-let bootId = 0;
 
 const MARKER_COLORS = {
   temple:          '#FF6F00',
@@ -164,8 +159,8 @@ const renderMarkers = (filterCategory = null) => {
   if (!map || !markersLayer) return;
   markersLayer.clearLayers();
   const toRender = filterCategory
-    ? places.value.filter(p => p.category === filterCategory)
-    : places.value;
+    ? placesStore.places.filter(p => p.category === filterCategory)
+    : placesStore.places;
   filteredCount.value = 0;
   toRender.forEach((place) => {
     if (place.latitude == null || place.longitude == null) return;
@@ -248,68 +243,23 @@ const initMap = () => {
   renderMarkers();
 };
 
-const fetchAllPlaces = async () => {
-  if (activeController) activeController.abort();
-  const controller = new AbortController();
-  activeController = controller;
-  loading.value = true;
-  loadingMessage.value = 'Loading heritage sites...';
-  error.value = null;
-  try {
-    // fetch all places in batches
-    const firstResponse = await api.get('/places', {
-      params: { limit: 500, page: 1 },
-      signal: controller.signal
-    });
-    const { pagination } = firstResponse.data;
-    if (controller.signal.aborted || isUnmounted) return false;
-    places.value = firstResponse.data.places;
-    loadingMessage.value = `${places.value.length} of ${pagination.total} sites...`;
-    // fetch remaining pages
-    const totalPages = pagination.totalPages;
-    for (let p = 2; p <= totalPages; p++) {
-      const response = await api.get('/places', {
-        params: { limit: 500, page: p },
-        signal: controller.signal
-      });
-      if (controller.signal.aborted || isUnmounted) return false;
-      places.value = [...places.value, ...response.data.places];
-      loadingMessage.value = `${places.value.length} of ${pagination.total} sites...`;
-    }
-    return true;
-  } catch (err) {
-    if (err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED' || controller.signal.aborted) return false;
-    console.error('[MapView] Failed to fetch places:', err);
-    error.value = 'Failed to load places. Please try again.';
-    return false;
-  } finally {
-    if (activeController === controller) activeController = null;
-    loading.value = false;
-  }
-};
-
 onMounted(async () => {
   isUnmounted = false;
-  const thisBoot = ++bootId;
   try {
-    const ok = await fetchAllPlaces();
-    if (!ok || isUnmounted || thisBoot !== bootId) return;
+    const ok = await placesStore.fetchIfStale();
+    if (!ok || isUnmounted) return;
     await nextTick();
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     initMap();
-    if (!map || isUnmounted || thisBoot !== bootId) return;
+    if (!map || isUnmounted) return;
     map.invalidateSize({ animate: false, pan: false });
   } catch (err) {
     console.error('[MapView] Map init failed:', err);
-    error.value = 'Map failed to load. Please refresh the page.';
-    loading.value = false;
   }
 });
 
 onUnmounted(() => {
   isUnmounted = true;
-  bootId++;
-  if (activeController) { activeController.abort(); activeController = null; }
   if (map) { map.remove(); map = null; markersLayer = null; }
 });
 </script>
