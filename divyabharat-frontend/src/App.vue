@@ -29,8 +29,8 @@
         <div class="db-nav-right">
 
           <template v-if="!isLoggedIn">
-            <router-link to="/login" class="db-nav-link">Login</router-link>
-            <router-link to="/register" class="db-nav-cta">Join</router-link>
+            <router-link to="/login" class="db-nav-link" active-class="db-nav-link--active">Login</router-link>
+            <router-link to="/register" class="db-nav-cta" active-class="db-nav-cta--active">Join</router-link>
           </template>
 
           <template v-else>
@@ -308,8 +308,10 @@ const onRouteEnter = () => {
   transition: background 0.2s;
 }
 
-.db-nav-cta:hover {
-  background: var(--db-gold-bright);
+.db-nav-cta:hover { background: var(--db-gold-bright); }
+.db-nav-cta--active {
+  background: var(--db-gold-bright) !important;
+  box-shadow: 0 0 0 2px rgba(200,134,30,0.4);
 }
 
 /* ---- User button ---- */
