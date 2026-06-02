@@ -274,10 +274,12 @@ JSON structure:
 }
 
 Rules:
-- 2-4 stops per day, mix temples/ghats/forts/monuments/sacred sites
+- 2-4 stops per day
+- ONLY include places from these categories: Hindu temples, Sikh gurudwaras, Jain temples, Buddhist monasteries/stupas, ghats, ashrams, sacred rivers/kunds, ancient Indian heritage sites, Indian forts and palaces, Indian archaeological sites, natural sacred sites (hills, caves, forests with Indian spiritual significance), Indian museums of art/culture/history
+- STRICTLY EXCLUDE: mosques, churches, cathedrals, dargahs, mazars, synagogues, or any place of Islamic or Christian worship — even if located in the destination city
 - duration_hours: realistic float between 0.5 and 4.0
 - latitude/longitude: accurate coordinates for the specific place
-- notes: practical and insightful, respectful of spiritual significance
+- notes: practical and insightful, respectful of Indian spiritual significance
 - Travel style: ${style || 'spiritual and heritage'}
 - Only return valid JSON, absolutely nothing else`;
 
