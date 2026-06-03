@@ -1,11 +1,13 @@
 <template>
-  <v-container class="py-8" style="max-width: 1000px;">
+  <div class="admin-root">
 
-    <div class="mb-8">
-      <p class="text-caption font-weight-bold text-uppercase mb-1"
-         style="letter-spacing: 3px; color: #B45309;">
-        Admin
-      </p>
+    <div class="page-hd">
+      <p class="text-eyebrow">Admin</p>
+      <h1 class="page-hd-title">Place Submissions</h1>
+      <p class="text-page-sub">Review and manage community submitted places.</p>
+    </div>
+
+    <div class="admin-body">
 
       <!-- Wikidata Import -->
       <v-card
@@ -66,14 +68,6 @@
           {{ importError }}
         </v-alert>
       </v-card>
-
-      <h1 class="font-playfair text-h4 font-weight-bold" style="color: #2C1810;">
-        Place Submissions
-      </h1>
-      <p class="text-body-2 mt-2" style="color: #78614A;">
-        Review and manage community submitted places.
-      </p>
-    </div>
 
     <v-progress-circular
       v-if="loading"
@@ -177,7 +171,9 @@
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" rounded="lg">
       {{ snackbar.message }}
     </v-snackbar>
-  </v-container>
+
+    </div><!-- end admin-body -->
+  </div><!-- end admin-root -->
 </template>
 
 <script setup>
@@ -256,3 +252,14 @@ const triggerImport = async () => {
 
 onMounted(fetchPendingPlaces);
 </script>
+<style scoped>
+.admin-root {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px clamp(20px, 4vw, 60px) 80px;
+  min-height: 100vh;
+}
+.admin-body {
+  margin-top: 0;
+}
+</style>

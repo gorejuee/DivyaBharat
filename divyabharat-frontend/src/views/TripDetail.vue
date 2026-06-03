@@ -677,8 +677,8 @@ const updateMap = () => {
 
   if (latlngs.length > 1) {
     mapPolyline = L.polyline(latlngs, {
-      color: 'rgba(200,134,30,0.6)',
-      weight: 2.5,
+      color: '#EAA030',
+      weight: 3,
       dashArray: '6 8',
       opacity: 1
     }).addTo(tripMap);
@@ -782,7 +782,7 @@ onUnmounted(() => {
 .td-btn-outline {
   display: inline-flex;
   align-items: center;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   padding: 8px 18px;
@@ -864,7 +864,7 @@ onUnmounted(() => {
 }
 
 .td-trip-desc {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: rgba(237,227,206,0.72);
   line-height: 1.6;
   margin: 0 0 12px;
@@ -898,7 +898,7 @@ onUnmounted(() => {
   border-radius: 10px;
   background: var(--db-gold);
   color: var(--db-bg);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   font-weight: 700;
@@ -958,7 +958,7 @@ onUnmounted(() => {
   margin-bottom: 10px;
 }
 .td-day-badge {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--db-bg);
@@ -1061,7 +1061,7 @@ onUnmounted(() => {
 .td-stop-menu-btn {
   width: 26px;
   height: 26px;
-  color: rgba(237,227,206,0.4);
+  color: rgba(237,227,206,0.72);
 }
 .td-stop-notes {
   font-size: 0.82rem;
@@ -1108,7 +1108,7 @@ onUnmounted(() => {
   line-height: 1.2;
 }
 .td-dialog-sub {
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--db-gold-bright);
@@ -1139,7 +1139,7 @@ onUnmounted(() => {
   border-top: 1px solid rgba(200,134,30,0.1);
 }
 .td-dialog-cancel {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   padding: 8px 16px;
@@ -1156,7 +1156,7 @@ onUnmounted(() => {
 .td-dialog-confirm {
   display: inline-flex;
   align-items: center;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   padding: 8px 20px;

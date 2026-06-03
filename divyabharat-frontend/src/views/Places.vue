@@ -5,8 +5,8 @@
     <section class="ex-header">
       <div class="ex-header-inner">
         <div class="ex-header-title">
-          <p class="ex-eyebrow font-label">Discover India's Soul</p>
-          <h1 class="ex-title font-display">Explore India</h1>
+          <p class="ex-eyebrow text-eyebrow">Discover India's Soul</p>
+          <h1 class="ex-title page-hd-title">Explore India</h1>
         </div>
         <div class="ex-search-wrap">
           <v-icon class="ex-search-icon" size="20">mdi-magnify</v-icon>
@@ -22,7 +22,7 @@
         </div>
         <div class="ex-count-row">
           <span class="ex-count font-display">{{ displayCount }}</span>
-          <span class="ex-count-label font-label">Heritage Sites</span>
+          <span class="ex-count-label text-meta">Heritage Sites</span>
         </div>
       </div>
     </section>
@@ -356,7 +356,7 @@ onMounted(() => {
 .explore-page {
   min-height: 100vh;
   background: var(--db-bg);
-  background-image: radial-gradient(circle, rgba(200,134,30,0.04) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(200,134,30,0.15) 1px, transparent 1px);
   background-size: 36px 36px;
   background-attachment: fixed;
 }
@@ -380,22 +380,8 @@ onMounted(() => {
 
 .ex-header-title { flex-shrink: 0; }
 
-.ex-eyebrow {
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 3.5px;
-  text-transform: uppercase;
-  color: var(--db-gold);
-  margin-bottom: 4px;
-}
-
-.ex-title {
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-  font-weight: 600;
-  color: var(--db-text);
-  letter-spacing: -0.5px;
-  line-height: 1;
-}
+.ex-eyebrow { margin-bottom: 4px; }
+.ex-title { line-height: 1; }
 
 .ex-count-row {
   display: flex;
@@ -412,13 +398,7 @@ onMounted(() => {
   line-height: 1;
 }
 
-.ex-count-label {
-  font-size: 0.66rem;
-  font-weight: 600;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: var(--db-text-muted);
-}
+.ex-count-label { font-weight: 600; }
 
 /* ---- Search (inline) ---- */
 .ex-search-wrap {

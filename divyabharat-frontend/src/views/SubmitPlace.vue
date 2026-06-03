@@ -1,18 +1,12 @@
 <template>
-  <v-container class="py-8" style="max-width: 700px;">
+  <div class="submit-root">
 
-    <div class="mb-8">
-      <p class="text-caption font-weight-bold text-uppercase mb-1"
-         style="letter-spacing: 3px; color: #B45309;">
-        Contribute
-      </p>
-      <h1 class="font-playfair text-h4 font-weight-bold" style="color: #2C1810;">
-        Submit a Place
-      </h1>
-      <p class="text-body-2 mt-2" style="color: #78614A;">
+    <div class="page-hd">
+      <p class="text-eyebrow">Contribute</p>
+      <h1 class="page-hd-title">Submit a Place</h1>
+      <p class="text-page-sub">
         India's spiritual and heritage legacy lives through the people who know it.
         If you've visited a place that deserves to be on this map, submit it here.
-        Every approved place becomes part of DivyaBharat's living guide.
       </p>
     </div>
 
@@ -193,7 +187,7 @@
         Submit for Review
       </v-btn>
     </v-form>
-  </v-container>
+  </div>
 </template>
 
 <script setup>
@@ -352,3 +346,12 @@ onUnmounted(() => {
   }
 });
 </script>
+
+<style scoped>
+.submit-root {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 40px clamp(20px, 4vw, 60px) 80px;
+  min-height: 100vh;
+}
+</style>

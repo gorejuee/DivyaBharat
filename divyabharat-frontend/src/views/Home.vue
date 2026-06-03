@@ -8,7 +8,7 @@
           <img src="/hero.png" class="fp-img" alt="Sacred India" />
           <div class="fp-veil fp-veil--hero" />
           <div class="fp-content fp-content--hero">
-            <span class="fp-badge">Sacred India</span>
+            <span class="fp-badge text-eyebrow">Sacred India</span>
             <h1 class="fp-title font-display">
               <span class="lw"><span class="li">DivyaBharat</span></span>
             </h1>
@@ -28,7 +28,7 @@
           <div class="fp-veil fp-veil--bottom" />
           <div class="fp-num font-label">01 / 03</div>
           <div class="fp-content fp-content--center">
-            <span class="fp-badge">AI Powered</span>
+            <span class="fp-badge text-eyebrow">AI Powered</span>
             <h2 class="fp-title font-display">
               <span class="lw"><span class="li">Ask the</span></span>
               <span class="lw"><span class="li">Guide</span></span>
@@ -48,7 +48,7 @@
           <div class="fp-veil fp-veil--left" />
           <div class="fp-num font-label">02 / 03</div>
           <div class="fp-content fp-content--left">
-            <span class="fp-badge">Interactive</span>
+            <span class="fp-badge text-eyebrow">Interactive</span>
             <h2 class="fp-title font-display">
               <span class="lw"><span class="li">Sacred</span></span>
               <span class="lw"><span class="li">Map</span></span>
@@ -68,7 +68,7 @@
           <div class="fp-veil fp-veil--right" />
           <div class="fp-num font-label">03 / 03</div>
           <div class="fp-content fp-content--right">
-            <span class="fp-badge">Plan Your Journey</span>
+            <span class="fp-badge text-eyebrow">Plan Your Journey</span>
             <h2 class="fp-title font-display">
               <span class="lw"><span class="li">Your</span></span>
               <span class="lw"><span class="li">Yatra</span></span>
@@ -209,32 +209,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, defineComponent, h } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/services/api';
+import MandalaLine from '@/components/MandalaLine.vue';
 
 const router = useRouter();
 const featuredPlaces = ref([]);
 const activePortalIdx = ref(0);
 
-const MandalaLine = defineComponent({
-  render() {
-    return h('div', { class: 'mandala-row' }, [
-      h('span', { class: 'ml-rule ml-rule--l' }),
-      h('svg', { width: '36', height: '36', viewBox: '0 0 36 36', fill: 'none' }, [
-        h('circle', { cx: '18', cy: '18', r: '16', stroke: 'rgba(200,134,30,0.32)', 'stroke-width': '0.6' }),
-        h('circle', { cx: '18', cy: '18', r: '10', stroke: 'rgba(200,134,30,0.32)', 'stroke-width': '0.6' }),
-        h('circle', { cx: '18', cy: '18', r: '4',  stroke: 'rgba(200,134,30,0.32)', 'stroke-width': '0.6' }),
-        h('circle', { cx: '18', cy: '18', r: '1.8', fill: 'rgba(200,134,30,0.65)' }),
-        h('line', { x1: '18', y1: '2',  x2: '18', y2: '34', stroke: 'rgba(200,134,30,0.18)', 'stroke-width': '0.5' }),
-        h('line', { x1: '2',  y1: '18', x2: '34', y2: '18', stroke: 'rgba(200,134,30,0.18)', 'stroke-width': '0.5' }),
-        h('line', { x1: '5',  y1: '5',  x2: '31', y2: '31', stroke: 'rgba(200,134,30,0.12)', 'stroke-width': '0.5' }),
-        h('line', { x1: '31', y1: '5',  x2: '5',  y2: '31', stroke: 'rgba(200,134,30,0.12)', 'stroke-width': '0.5' }),
-      ]),
-      h('span', { class: 'ml-rule ml-rule--r' }),
-    ]);
-  }
-});
 
 const stats = [
   { value: '6000+', label: 'Heritage Sites' },
@@ -351,8 +334,8 @@ onUnmounted(() => {
 ================================================================ */
 .home {
   background: var(--db-bg);
-  background-image: radial-gradient(circle, rgba(200,134,30,0.04) 1px, transparent 1px);
-  background-size: 36px 36px;
+  background-image: radial-gradient(circle, rgba(200,134,30,0.15) 1px, transparent 1px);
+  background-size: 32px 32px;
   background-attachment: fixed;
 }
 
@@ -419,6 +402,7 @@ onUnmounted(() => {
   height: 100%;
   object-fit: cover;
   animation: kenBurns 20s ease-in-out infinite alternate;
+  animation-delay: -5s;
   will-change: transform;
 }
 
@@ -588,11 +572,7 @@ onUnmounted(() => {
 /* Badge */
 .fp-badge {
   display: inline-block;
-  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--db-gold);
   background: rgba(200,134,30,0.1);
   border: 1px solid rgba(200,134,30,0.28);
   padding: 4px 14px;
@@ -716,20 +696,6 @@ onUnmounted(() => {
   color: var(--db-text);
   margin-top: 12px;
 }
-:deep(.mandala-row) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  width: 100%;
-}
-:deep(.ml-rule) {
-  flex: 1;
-  max-width: 100px;
-  height: 1px;
-}
-:deep(.ml-rule--l) { background: linear-gradient(to right, transparent, rgba(200,134,30,0.32)); }
-:deep(.ml-rule--r) { background: linear-gradient(to left,  transparent, rgba(200,134,30,0.32)); }
 
 /* ================================================================
    CATEGORY RIBBON
@@ -870,7 +836,7 @@ onUnmounted(() => {
 }
 
 .feat-state {
-  font-size: 0.66rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -888,7 +854,7 @@ onUnmounted(() => {
 
 .feat-desc {
   font-size: 0.84rem;
-  color: rgba(237,227,206,0.52);
+  color: rgba(237,227,206,0.75);
   line-height: 1.65;
   margin-bottom: 14px;
 }

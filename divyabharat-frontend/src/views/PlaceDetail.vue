@@ -4,7 +4,7 @@
     <!-- ── Loading ── -->
     <div v-if="loading" class="pd-loading">
       <v-progress-circular indeterminate color="primary" size="52" width="2" />
-      <p class="pd-loading-label font-label">Summoning records…</p>
+      <p class="pd-loading-label text-eyebrow">Summoning records…</p>
     </div>
 
     <!-- ── Not Found ── -->
@@ -121,7 +121,7 @@
             data-section="about"
             class="pd-section pd-reveal"
           >
-            <h2 class="pd-section-title font-label">About</h2>
+            <h2 class="pd-section-title text-eyebrow">About</h2>
             <p v-if="place.description" class="pd-body-text font-body">
               {{ place.description }}
             </p>
@@ -147,7 +147,7 @@
             data-section="history"
             class="pd-section pd-reveal"
           >
-            <h2 class="pd-section-title font-label">History</h2>
+            <h2 class="pd-section-title text-eyebrow">History</h2>
             <div class="pd-history-card">
               <p class="pd-body-text font-body" style="margin:0;">{{ place.history }}</p>
             </div>
@@ -160,7 +160,7 @@
             data-section="location"
             class="pd-section pd-reveal"
           >
-            <h2 class="pd-section-title font-label">Location</h2>
+            <h2 class="pd-section-title text-eyebrow">Location</h2>
             <div class="pd-map-wrap">
               <div :id="`mini-map-${place.id}`" class="pd-map" />
               <div class="pd-map-footer">
@@ -185,7 +185,7 @@
             data-section="ai"
             class="pd-section pd-section--last pd-reveal"
           >
-            <h2 class="pd-section-title font-label">AI Guide</h2>
+            <h2 class="pd-section-title text-eyebrow">AI Guide</h2>
 
             <div v-if="!isLoggedIn" class="pd-ai-locked">
               <v-icon size="36" style="color:var(--db-gold);opacity:0.3;">mdi-lock-outline</v-icon>
@@ -474,6 +474,9 @@ onUnmounted(() => {
 /* ── Root ── */
 .pd-root {
   background: var(--db-bg);
+  background-image: radial-gradient(circle, rgba(200,134,30,0.15) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
   color: var(--db-text);
   min-height: 100vh;
   margin-top: -80px;
@@ -489,13 +492,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 20px;
 }
-.pd-loading-label {
-  font-size: 0.62rem;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--db-gold);
-  opacity: 0.6;
-}
+.pd-loading-label { opacity: 0.6; }
 .pd-notfound {
   min-height: 100vh;
   background: var(--db-bg);
@@ -786,9 +783,6 @@ onUnmounted(() => {
 
 .pd-section-title {
   font-size: 0.78rem;
-  letter-spacing: 3.5px;
-  text-transform: uppercase;
-  color: var(--db-gold);
   margin: 0 0 28px;
   display: flex;
   align-items: center;

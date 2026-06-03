@@ -78,6 +78,45 @@ body {
   font-family: var(--font-label) !important;
 }
 
+/* Small uppercase gold label above headings */
+.text-eyebrow {
+  font-family: var(--font-label);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--db-gold);
+}
+
+/* Subtitle / description below a title */
+.text-page-sub {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--db-text-muted);
+  line-height: 1.6;
+}
+
+/* Small uppercase muted meta label (stats, chips, counts) */
+.text-meta {
+  font-family: var(--font-label);
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--db-text-muted);
+}
+
+/* ---- Standard page header ---- */
+.page-hd {
+  margin-bottom: 48px;
+}
+.page-hd-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+  color: var(--db-text);
+  line-height: 1.1;
+  margin: 8px 0 10px;
+}
+
 /* ---- Page transitions ---- */
 .page-enter-active,
 .page-leave-active {

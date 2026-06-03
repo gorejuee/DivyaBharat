@@ -1,9 +1,9 @@
 <template>
-  <v-container class="py-8 page-container">
-    <div class="mb-8">
-      <p class="page-eyebrow">Your journey</p>
-      <h1 class="font-playfair page-title">My Visited Places</h1>
-      <p class="page-sub mt-2">Places you have marked as visited on DivyaBharat.</p>
+  <div class="myplaces-root">
+    <div class="page-hd">
+      <p class="text-eyebrow">Your Journey</p>
+      <h1 class="page-hd-title">My Visited Places</h1>
+      <p class="text-page-sub">Places you have marked as visited on DivyaBharat.</p>
     </div>
 
     <v-progress-circular
@@ -33,7 +33,7 @@
         @click="router.push(`/places/${place.id}`)"
       />
     </transition-group>
-  </v-container>
+  </div>
 </template>
 
 <script setup>
@@ -62,29 +62,11 @@ onMounted(fetchVisitedPlaces);
 </script>
 
 <style scoped>
-.page-container {
+.myplaces-root {
   max-width: 1200px;
-}
-
-.page-eyebrow {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: #B45309;
-  margin-bottom: 4px;
-}
-
-.page-title {
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
-  color: #2C1810;
-  line-height: 1.2;
-}
-
-.page-sub {
-  font-family: 'Inter', sans-serif;
-  color: #78614A;
+  margin: 0 auto;
+  padding: 40px clamp(20px, 4vw, 60px) 80px;
+  min-height: 100vh;
 }
 
 .places-grid {

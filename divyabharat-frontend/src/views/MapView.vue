@@ -4,8 +4,8 @@
     <!-- Filter panel -->
     <div class="mv-panel">
       <div class="mv-panel-header">
+        <p class="mv-panel-eyebrow text-eyebrow">Heritage of India</p>
         <p class="mv-panel-title font-display">Sacred Map</p>
-        <p class="mv-panel-eyebrow font-label">Heritage of India</p>
       </div>
 
       <div class="mv-rule" />
@@ -300,18 +300,12 @@ onUnmounted(() => {
 
 .mv-panel-header { margin-bottom: 2px; }
 .mv-panel-title {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   color: var(--db-text);
   margin: 0;
   line-height: 1.15;
 }
-.mv-panel-eyebrow {
-  font-size: 0.72rem;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: var(--db-gold);
-  margin: 5px 0 0;
-}
+.mv-panel-eyebrow { margin: 0 0 8px; }
 
 .mv-rule {
   height: 1px;

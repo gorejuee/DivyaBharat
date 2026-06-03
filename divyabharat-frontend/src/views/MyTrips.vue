@@ -1,11 +1,12 @@
 <template>
   <div class="yt-root">
+    <div class="yt-inner">
 
     <!-- Page header -->
-    <div class="yt-header">
-      <p class="yt-eyebrow font-label">Sacred Journeys</p>
-      <h1 class="yt-title font-display">My Yatra</h1>
-      <p class="yt-sub font-body">Plan, record and relive your pilgrimages across India.</p>
+    <div class="page-hd">
+      <p class="text-eyebrow">Sacred Journeys</p>
+      <h1 class="page-hd-title">My Yatra</h1>
+      <p class="text-page-sub">Plan, record and relive your pilgrimages across India.</p>
     </div>
 
     <!-- AI Planner banner -->
@@ -40,17 +41,17 @@
     <div v-if="trips.length" class="yt-stats-strip">
       <div class="yt-stat">
         <span class="yt-stat-num font-display">{{ trips.length }}</span>
-        <span class="yt-stat-label font-label">Journeys</span>
+        <span class="text-meta">Journeys</span>
       </div>
       <div class="yt-stat-divider" />
       <div class="yt-stat">
         <span class="yt-stat-num font-display">{{ totalDays }}</span>
-        <span class="yt-stat-label font-label">Total Days</span>
+        <span class="text-meta">Total Days</span>
       </div>
       <div class="yt-stat-divider" />
       <div class="yt-stat">
         <span class="yt-stat-num font-display">{{ totalStops }}</span>
-        <span class="yt-stat-label font-label">Sacred Stops</span>
+        <span class="text-meta">Sacred Stops</span>
       </div>
     </div>
 
@@ -60,7 +61,7 @@
     <div class="yt-circuits">
       <div class="yt-section-head" style="margin-bottom:20px;">
         <h2 class="yt-section-title font-display">Sacred Circuits</h2>
-        <p class="yt-circuits-sub font-body">Popular pilgrimage routes, click any to plan with AI</p>
+        <p class="text-page-sub">Popular pilgrimage routes, click any to plan with AI</p>
       </div>
       <div class="yt-circuits-grid">
         <div
@@ -380,33 +381,15 @@
       </div>
     </v-dialog>
 
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, defineComponent, h } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTripsStore } from '@/stores/trips';
-
-// Section divider (same as Home.vue MandalaLine)
-const MandalaLine = defineComponent({
-  render() {
-    return h('div', { class: 'yt-mandala-row' }, [
-      h('span', { class: 'yt-ml-rule yt-ml-rule--l' }),
-      h('svg', { width: '36', height: '36', viewBox: '0 0 36 36', fill: 'none' }, [
-        h('circle', { cx: '18', cy: '18', r: '16', stroke: 'rgba(200,134,30,0.32)', 'stroke-width': '0.6' }),
-        h('circle', { cx: '18', cy: '18', r: '10', stroke: 'rgba(200,134,30,0.32)', 'stroke-width': '0.6' }),
-        h('circle', { cx: '18', cy: '18', r: '4',  stroke: 'rgba(200,134,30,0.32)', 'stroke-width': '0.6' }),
-        h('circle', { cx: '18', cy: '18', r: '1.8', fill: 'rgba(200,134,30,0.65)' }),
-        h('line', { x1: '18', y1: '2',  x2: '18', y2: '34', stroke: 'rgba(200,134,30,0.18)', 'stroke-width': '0.5' }),
-        h('line', { x1: '2',  y1: '18', x2: '34', y2: '18', stroke: 'rgba(200,134,30,0.18)', 'stroke-width': '0.5' }),
-        h('line', { x1: '5',  y1: '5',  x2: '31', y2: '31', stroke: 'rgba(200,134,30,0.12)', 'stroke-width': '0.5' }),
-        h('line', { x1: '31', y1: '5',  x2: '5',  y2: '31', stroke: 'rgba(200,134,30,0.12)', 'stroke-width': '0.5' }),
-      ]),
-      h('span', { class: 'yt-ml-rule yt-ml-rule--r' }),
-    ]);
-  }
-});
+import MandalaLine from '@/components/MandalaLine.vue';
 
 const router = useRouter();
 const tripsStore = useTripsStore();
@@ -593,38 +576,19 @@ onMounted(async () => {
 /* Root */
 .yt-root {
   background: var(--db-bg);
-  background-image: radial-gradient(circle, rgba(200,134,30,0.04) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(200,134,30,0.15) 1px, transparent 1px);
   background-size: 32px 32px;
   background-attachment: fixed;
   color: var(--db-text);
   min-height: 100vh;
-  padding: 40px clamp(20px, 5vw, 80px) 80px;
-  max-width: 1120px;
-  margin: 0 auto;
 }
 
-/* Page header */
-.yt-header {
-  margin-bottom: 40px;
+.yt-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 40px clamp(20px, 5vw, 80px) 80px;
 }
-.yt-eyebrow {
-  font-size: 0.68rem;
-  letter-spacing: 3.5px;
-  text-transform: uppercase;
-  color: var(--db-gold);
-  margin: 0 0 10px;
-}
-.yt-title {
-  font-size: clamp(2rem, 5vw, 3.2rem);
-  color: var(--db-text);
-  line-height: 1.1;
-  margin: 0 0 10px;
-}
-.yt-sub {
-  font-size: 1rem;
-  color: var(--db-text-muted);
-  margin: 0;
-}
+
 
 /* Stats strip */
 .yt-stats-strip {
@@ -650,12 +614,6 @@ onMounted(async () => {
   color: var(--db-gold);
   line-height: 1;
   margin-bottom: 5px;
-}
-.yt-stat-label {
-  font-size: 0.62rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--db-text-muted);
 }
 .yt-stat-divider {
   width: 1px;
@@ -722,7 +680,7 @@ onMounted(async () => {
 .yt-ai-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--db-gold);
@@ -732,13 +690,13 @@ onMounted(async () => {
   margin-bottom: 10px;
 }
 .yt-ai-title {
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
   color: var(--db-text);
   margin: 0 0 8px;
   line-height: 1.1;
 }
 .yt-ai-sub {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: rgba(237,227,206,0.7);
   line-height: 1.65;
   margin: 0;
@@ -763,30 +721,9 @@ onMounted(async () => {
   transform: translateY(-1px);
 }
 
-/* MandalaLine divider - :deep() required so scoped styles reach inside the child component */
-:deep(.yt-mandala-row) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  margin: 32px 0;
-  width: 100%;
-}
-:deep(.yt-ml-rule) {
-  flex: 1;
-  max-width: 100px;
-  height: 1px;
-}
-:deep(.yt-ml-rule--l) { background: linear-gradient(to right, transparent, rgba(200,134,30,0.32)); }
-:deep(.yt-ml-rule--r) { background: linear-gradient(to left,  transparent, rgba(200,134,30,0.32)); }
 
 /* Sacred Circuits */
 .yt-circuits { margin-bottom: 48px; }
-.yt-circuits-sub {
-  font-size: 0.88rem;
-  color: var(--db-text-muted);
-  margin: 0;
-}
 .yt-circuits-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -846,7 +783,7 @@ onMounted(async () => {
   padding: 3px 9px;
 }
 .yt-route-cta {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: rgba(255,255,255,0.9);
@@ -870,7 +807,7 @@ onMounted(async () => {
 .yt-new-btn {
   display: inline-flex;
   align-items: center;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   padding: 8px 18px;
@@ -895,7 +832,7 @@ onMounted(async () => {
   padding: 64px 0;
 }
 .yt-loading-label {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   letter-spacing: 2.5px;
   text-transform: uppercase;
   color: var(--db-gold);
@@ -1036,7 +973,7 @@ onMounted(async () => {
   border-top: 1px solid var(--db-border);
   position: relative;
   z-index: 1;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--db-gold);
@@ -1077,7 +1014,7 @@ onMounted(async () => {
   line-height: 1.2;
 }
 .yt-dialog-sub {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--db-gold);
@@ -1119,7 +1056,7 @@ onMounted(async () => {
   margin-top: 16px;
 }
 .yt-generating-label {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--db-gold);
@@ -1137,7 +1074,7 @@ onMounted(async () => {
   border-top: 1px solid rgba(200,134,30,0.1);
 }
 .yt-dialog-cancel {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   padding: 9px 18px;
@@ -1154,7 +1091,7 @@ onMounted(async () => {
 .yt-dialog-confirm {
   display: inline-flex;
   align-items: center;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   padding: 9px 22px;
@@ -1172,7 +1109,7 @@ onMounted(async () => {
 .yt-dialog-danger {
   display: inline-flex;
   align-items: center;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   padding: 9px 22px;
