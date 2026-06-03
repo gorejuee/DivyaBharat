@@ -196,11 +196,21 @@
       <!-- Alerts -->
       <div v-if="successMessage" class="sp-alert sp-alert--success font-body">
         <v-icon size="18" style="margin-right:10px;flex-shrink:0;">mdi-check-circle-outline</v-icon>
-        {{ successMessage }}
+        <span style="flex:1;">{{ successMessage }}</span>
+        <button type="button" class="sp-alert-close" @click="successMessage = ''">
+          <v-icon size="16">mdi-close</v-icon>
+        </button>
       </div>
       <div v-if="errorMessage" class="sp-alert sp-alert--error font-body">
         <v-icon size="18" style="margin-right:10px;flex-shrink:0;">mdi-alert-circle-outline</v-icon>
         {{ errorMessage }}
+      </div>
+      <div v-if="validationError" class="sp-alert sp-alert--error font-body">
+        <v-icon size="18" style="margin-right:10px;flex-shrink:0;">mdi-alert-circle-outline</v-icon>
+        <span style="flex:1;">{{ validationError }}</span>
+        <button type="button" class="sp-alert-close" @click="validationError = ''">
+          <v-icon size="16">mdi-close</v-icon>
+        </button>
       </div>
 
       <!-- Submit -->
@@ -232,6 +242,7 @@ const EMPTY_FORM = {
 const loading = ref(false);
 const successMessage = ref('');
 const errorMessage = ref('');
+const validationError = ref('');
 const errors = ref({});
 const form = ref({ ...EMPTY_FORM });
 const locationSearch = ref('');
@@ -314,8 +325,24 @@ watch([() => form.value.latitude, () => form.value.longitude], ([lat, lng]) => {
   }
 });
 
+// Clear field errors as user fills them in
+watch(() => form.value.name, (v) => { if (v) { delete errors.value.name; checkClearValidationBanner(); } });
+watch(() => form.value.category, (v) => { if (v) { delete errors.value.category; checkClearValidationBanner(); } });
+watch(() => form.value.state, (v) => { if (v) { delete errors.value.state; checkClearValidationBanner(); } });
+
+const checkClearValidationBanner = () => {
+  if (Object.keys(errors.value).length === 0) validationError.value = '';
+};
+
 const handleSubmit = async () => {
-  if (!validate()) return;
+  validationError.value = '';
+  if (!validate()) {
+    validationError.value = 'Please fill in all required fields above.';
+    await nextTick();
+    const firstErr = document.querySelector('.sp-field-err');
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
   loading.value = true;
   successMessage.value = '';
   errorMessage.value = '';
@@ -592,6 +619,20 @@ onUnmounted(() => {
   border: 1px solid rgba(220,64,64,0.28);
   color: #F87171;
 }
+.sp-alert-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-left: 10px;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.sp-alert-close:hover { opacity: 1; }
 
 /* Submit */
 .sp-submit {
