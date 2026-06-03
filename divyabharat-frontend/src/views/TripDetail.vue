@@ -127,7 +127,12 @@
                   </v-menu>
                 </div>
               </div>
-              <p v-if="stop.notes" class="td-stop-notes font-body">{{ stop.notes }}</p>
+              <div v-if="stop.notes" class="td-notes-wrap">
+                <p class="td-stop-notes font-body" :class="{ 'td-stop-notes--expanded': expandedNotes.has(stop.id) }">{{ stop.notes }}</p>
+                <button v-if="stop.notes.length > 120" class="td-notes-toggle font-label" @click.stop="toggleNote(stop.id)">
+                  {{ expandedNotes.has(stop.id) ? 'Show less' : 'Read more' }}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -280,6 +285,13 @@ const loading = ref(true);
 const hoveredStop = ref(null);
 const mapRef = ref(null);
 const panelRef = ref(null);
+const expandedNotes = ref(new Set());
+
+const toggleNote = (stopId) => {
+  const s = new Set(expandedNotes.value);
+  s.has(stopId) ? s.delete(stopId) : s.add(stopId);
+  expandedNotes.value = s;
+};
 
 const trip = computed(() => tripsStore.currentTrip);
 
@@ -1063,17 +1075,40 @@ onUnmounted(() => {
   height: 26px;
   color: rgba(237,227,206,0.72);
 }
+.td-notes-wrap { margin: 5px 0 0; }
+
 .td-stop-notes {
   font-size: 0.82rem;
   color: rgba(237,227,206,0.65);
   line-height: 1.55;
-  margin: 5px 0 0;
+  margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.td-stop-notes--expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  overflow: visible;
+}
+
+.td-notes-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--db-gold);
+  padding: 4px 0 0;
+  display: block;
+  transition: color 0.15s;
+}
+.td-notes-toggle:hover { color: var(--db-gold-bright); }
 
 /* ── Dialogs ── */
 .td-dialog {
