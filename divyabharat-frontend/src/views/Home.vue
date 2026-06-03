@@ -797,15 +797,16 @@ onUnmounted(() => {
   height: 460px;
   overflow: hidden;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 12px;
   background: var(--db-surface-2);
-  transition: transform 0.45s var(--ease-out), box-shadow 0.45s var(--ease-out);
+  box-shadow: 0 0 0 1px rgba(200,134,30,0.15), 0 8px 32px rgba(0,0,0,0.3);
+  transition: translate 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
 }
 .feat-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 32px 72px rgba(0,0,0,0.7);
+  translate: 0 -8px;
+  box-shadow: 0 0 0 1px rgba(200,134,30,0.55), 0 24px 56px rgba(0,0,0,0.55);
 }
-.feat-card:hover .feat-img { transform: scale(1.07); }
+.feat-card:hover .feat-img { transform: scale(1.08); }
 .feat-card:hover .feat-cta { opacity: 1; transform: translateY(0); }
 
 .feat-img {
