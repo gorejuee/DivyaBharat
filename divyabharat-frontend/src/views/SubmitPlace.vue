@@ -481,7 +481,7 @@ onUnmounted(() => {
 .sp-input::placeholder,
 .sp-textarea::placeholder { color: var(--db-text-faint); }
 
-/* Vuetify select — border and bg matched to custom inputs */
+/* Vuetify select - border and bg matched to custom inputs */
 .sp-vselect :deep(.v-field) {
   background: var(--db-surface-2) !important;
   border-radius: 10px !important;
