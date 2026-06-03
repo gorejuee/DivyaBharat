@@ -220,6 +220,7 @@ onMounted(fetchPendingPlaces);
 <style scoped>
 .ap-root {
   min-height: 100vh;
+  margin-top: -80px;
   background: var(--db-bg);
   background-image: radial-gradient(circle, rgba(200,134,30,0.15) 1px, transparent 1px);
   background-size: 32px 32px;
@@ -228,7 +229,7 @@ onMounted(fetchPendingPlaces);
 .ap-inner {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 40px clamp(20px, 4vw, 60px) 100px;
+  padding: 120px clamp(20px, 4vw, 60px) 100px;
 }
 
 /* Import card */
