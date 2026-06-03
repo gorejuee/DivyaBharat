@@ -1,192 +1,217 @@
 <template>
-  <div class="submit-root">
+  <div class="sp-root">
+    <div class="sp-inner">
 
+    <!-- Header -->
     <div class="page-hd">
       <p class="text-eyebrow">Contribute</p>
-      <h1 class="page-hd-title">Submit a Place</h1>
+      <h1 class="page-hd-title">Submit a Sacred Place</h1>
       <p class="text-page-sub">
         India's spiritual and heritage legacy lives through the people who know it.
-        If you've visited a place that deserves to be on this map, submit it here.
+        If you've visited a place that deserves to be on this map, share it here.
+        Every approved place becomes part of DivyaBharat's living guide.
       </p>
     </div>
 
-    <v-form ref="formRef" @submit.prevent="handleSubmit">
+    <MandalaLine />
 
-      <v-text-field
-        v-model="form.name"
-        label="Place name *"
-        variant="outlined"
-        color="primary"
-        base-color="primary"
-        class="mb-4"
-        :rules="[v => !!v || 'Name is required']"
-      />
+    <v-form @submit.prevent="handleSubmit" class="sp-form">
 
-      <v-select
-        v-model="form.category"
-        :items="CATEGORIES"
-        label="Category *"
-        variant="outlined"
-        color="primary"
-        base-color="primary"
-        class="mb-4"
-        :rules="[v => !!v || 'Category is required']"
-      />
+      <!-- Section 1: Identity -->
+      <div class="sp-section">
+        <div class="sp-section-head">
+          <span class="sp-num font-label">01</span>
+          <div>
+            <p class="sp-section-label text-eyebrow">Identity</p>
+            <p class="sp-section-hint font-body">Name and classify the place</p>
+          </div>
+        </div>
 
-      <v-row>
-        <v-col cols="12" md="6">
-          <v-text-field
-            v-model="form.state"
-            label="State *"
-            variant="outlined"
-            color="primary"
-            base-color="primary"
-            :rules="[v => !!v || 'State is required']"
-          />
-        </v-col>
-        <v-col cols="12" md="6">
-          <v-text-field
-            v-model="form.city"
-            label="City"
-            variant="outlined"
-            color="primary"
-            base-color="primary"
-          />
-        </v-col>
-      </v-row>
+        <div class="sp-fields">
+          <div class="sp-field-wrap">
+            <label class="sp-label font-label">Place Name <span class="sp-req">*</span></label>
+            <input
+              v-model="form.name"
+              class="sp-input font-body"
+              placeholder="e.g. Kedarnath Temple"
+              autocomplete="off"
+            />
+            <p v-if="errors.name" class="sp-field-err font-body">{{ errors.name }}</p>
+          </div>
 
-      <v-textarea
-        v-model="form.description"
-        label="Description"
-        variant="outlined"
-        color="primary"
-        base-color="primary"
-        rows="3"
-        class="mb-4"
-      />
-
-      <v-textarea
-        v-model="form.history"
-        label="History"
-        variant="outlined"
-        color="primary"
-        base-color="primary"
-        rows="4"
-        class="mb-4"
-      />
-
-      <!-- Location section -->
-      <div class="mb-4">
-        <p class="text-body-2 font-weight-medium mb-1" style="color: #2C1810;">Location</p>
-        <p class="text-caption mb-3" style="color: #78614A;">
-          Search by name to auto-fill coordinates, or click anywhere on the map to drop a pin.
-        </p>
-
-        <v-text-field
-          v-model="locationSearch"
-          label="Search location on map"
-          variant="outlined"
-          color="primary"
-          base-color="primary"
-          prepend-inner-icon="mdi-map-search"
-          clearable
-          hide-details
-          class="mb-2"
-          :loading="searchLoading"
-          @update:modelValue="debouncedLocationSearch"
-          @click:clear="locationSuggestions = []"
-        />
-
-        <v-list
-          v-if="locationSuggestions.length"
-          class="mb-3 rounded border"
-          density="compact"
-          style="max-height: 200px; overflow-y: auto;"
-        >
-          <v-list-item
-            v-for="(suggestion, index) in locationSuggestions"
-            :key="index"
-            :title="suggestion.display_name"
-            class="cursor-pointer"
-            @click="selectSuggestion(suggestion)"
-          />
-        </v-list>
-
-        <div ref="locationMapRef" class="mb-3" style="height: 300px; border-radius: 8px; z-index: 0;" />
-
-        <v-row>
-          <v-col cols="12" md="6">
-            <v-text-field
-              v-model="form.latitude"
-              label="Latitude"
+          <div class="sp-field-wrap">
+            <label class="sp-label font-label">Category <span class="sp-req">*</span></label>
+            <v-select
+              v-model="form.category"
+              :items="CATEGORIES"
+              item-title="title"
+              item-value="value"
+              placeholder="Select a category"
               variant="outlined"
+              density="comfortable"
               color="primary"
-              base-color="primary"
-              type="number"
+              class="sp-vselect"
               hide-details
             />
-          </v-col>
-          <v-col cols="12" md="6">
-            <v-text-field
-              v-model="form.longitude"
-              label="Longitude"
-              variant="outlined"
-              color="primary"
-              base-color="primary"
-              type="number"
-              hide-details
-            />
-          </v-col>
-        </v-row>
+            <p v-if="errors.category" class="sp-field-err font-body">{{ errors.category }}</p>
+          </div>
+
+          <div class="sp-row">
+            <div class="sp-field-wrap">
+              <label class="sp-label font-label">State <span class="sp-req">*</span></label>
+              <input v-model="form.state" class="sp-input font-body" placeholder="e.g. Uttarakhand" />
+              <p v-if="errors.state" class="sp-field-err font-body">{{ errors.state }}</p>
+            </div>
+            <div class="sp-field-wrap">
+              <label class="sp-label font-label">City / District</label>
+              <input v-model="form.city" class="sp-input font-body" placeholder="e.g. Rudraprayag" />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <v-text-field
-        v-model="form.image_url"
-        label="Image URL"
-        variant="outlined"
-        color="primary"
-        base-color="primary"
-        class="mt-4 mb-6"
-        hint="Paste a direct image link (e.g. from Wikimedia Commons)"
-        persistent-hint
-      />
+      <MandalaLine />
 
-      <v-alert
-        v-if="successMessage"
-        type="success"
-        variant="tonal"
-        rounded="lg"
-        closable
-        class="mb-4"
-        @click:close="successMessage = ''"
-      >
+      <!-- Section 2: Story -->
+      <div class="sp-section">
+        <div class="sp-section-head">
+          <span class="sp-num font-label">02</span>
+          <div>
+            <p class="sp-section-label text-eyebrow">Story</p>
+            <p class="sp-section-hint font-body">Help others understand its significance</p>
+          </div>
+        </div>
+
+        <div class="sp-fields">
+          <div class="sp-field-wrap">
+            <label class="sp-label font-label">Description</label>
+            <textarea
+              v-model="form.description"
+              class="sp-textarea font-body"
+              rows="3"
+              placeholder="A brief overview of the place and why it matters"
+            />
+          </div>
+
+          <div class="sp-field-wrap">
+            <label class="sp-label font-label">History</label>
+            <textarea
+              v-model="form.history"
+              class="sp-textarea font-body"
+              rows="4"
+              placeholder="Historical or mythological background, legends, era of origin"
+            />
+          </div>
+        </div>
+      </div>
+
+      <MandalaLine />
+
+      <!-- Section 3: Location -->
+      <div class="sp-section">
+        <div class="sp-section-head">
+          <span class="sp-num font-label">03</span>
+          <div>
+            <p class="sp-section-label text-eyebrow">Location</p>
+            <p class="sp-section-hint font-body">Search by name or click the map to pin the spot</p>
+          </div>
+        </div>
+
+        <div class="sp-fields">
+          <div class="sp-field-wrap sp-search-wrap">
+            <label class="sp-label font-label">Search on map</label>
+            <div class="sp-search-row">
+              <v-icon class="sp-search-icon" size="18">mdi-map-search</v-icon>
+              <input
+                v-model="locationSearch"
+                class="sp-input sp-search-input font-body"
+                placeholder="Type a place name to locate it"
+                autocomplete="off"
+                @input="debouncedLocationSearch(locationSearch)"
+              />
+              <button v-if="locationSearch" type="button" class="sp-search-clear" @click="locationSearch = ''; locationSuggestions = []">
+                <v-icon size="15">mdi-close</v-icon>
+              </button>
+            </div>
+
+            <div v-if="locationSuggestions.length" class="sp-suggestions">
+              <button
+                v-for="(s, i) in locationSuggestions"
+                :key="i"
+                type="button"
+                class="sp-suggestion font-body"
+                @click="selectSuggestion(s)"
+              >
+                <v-icon size="13" style="color:var(--db-gold);margin-right:8px;flex-shrink:0;">mdi-map-marker-outline</v-icon>
+                {{ s.display_name }}
+              </button>
+            </div>
+          </div>
+
+          <div ref="locationMapRef" class="sp-map" />
+
+          <div class="sp-row">
+            <div class="sp-field-wrap">
+              <label class="sp-label font-label">Latitude</label>
+              <input v-model="form.latitude" class="sp-input font-body" type="number" placeholder="e.g. 30.7352" />
+            </div>
+            <div class="sp-field-wrap">
+              <label class="sp-label font-label">Longitude</label>
+              <input v-model="form.longitude" class="sp-input font-body" type="number" placeholder="e.g. 79.0669" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <MandalaLine />
+
+      <!-- Section 4: Media -->
+      <div class="sp-section">
+        <div class="sp-section-head">
+          <span class="sp-num font-label">04</span>
+          <div>
+            <p class="sp-section-label text-eyebrow">Media</p>
+            <p class="sp-section-hint font-body">A good photo helps bring the place to life</p>
+          </div>
+        </div>
+
+        <div class="sp-fields">
+          <div class="sp-field-wrap">
+            <label class="sp-label font-label">Image URL</label>
+            <input
+              v-model="form.image_url"
+              class="sp-input font-body"
+              placeholder="Paste a direct image link (Wikimedia Commons works great)"
+            />
+            <p class="sp-field-hint font-body">Optional. We'll use a category illustration if left blank.</p>
+          </div>
+
+          <div v-if="form.image_url" class="sp-img-preview">
+            <img :src="form.image_url" alt="Preview" @error="previewFailed = true" @load="previewFailed = false" />
+            <div v-if="previewFailed" class="sp-img-fail font-body">Could not load image. Check the URL.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts -->
+      <div v-if="successMessage" class="sp-alert sp-alert--success font-body">
+        <v-icon size="18" style="margin-right:10px;flex-shrink:0;">mdi-check-circle-outline</v-icon>
         {{ successMessage }}
-      </v-alert>
-
-      <v-alert
-        v-if="errorMessage"
-        type="error"
-        variant="tonal"
-        rounded="lg"
-        closable=""
-        class="mb-4"
-        @click:close="errorMessage = ''"
-      >
+      </div>
+      <div v-if="errorMessage" class="sp-alert sp-alert--error font-body">
+        <v-icon size="18" style="margin-right:10px;flex-shrink:0;">mdi-alert-circle-outline</v-icon>
         {{ errorMessage }}
-      </v-alert>
+      </div>
 
-      <v-btn
-        type="submit"
-        color="primary"
-        variant="flat"
-        size="large"
-        rounded="lg"
-        :loading="loading"
-        block
-      >
+      <!-- Submit -->
+      <button type="submit" class="sp-submit font-label" :disabled="loading">
+        <v-progress-circular v-if="loading" indeterminate size="16" width="2" color="white" style="margin-right:10px;" />
+        <v-icon v-else size="16" style="margin-right:10px;">mdi-send-outline</v-icon>
         Submit for Review
-      </v-btn>
+      </button>
+
     </v-form>
+    </div>
   </div>
 </template>
 
@@ -195,76 +220,73 @@ import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { debounce } from 'lodash';
 import api from '@/services/api';
 import { CATEGORIES } from '@/utils/placeHelpers';
+import MandalaLine from '@/components/MandalaLine.vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const EMPTY_FORM = {
-  name: '',
-  category: null,
-  state: '',
-  city: '',
-  description: '',
-  history: '',
-  latitude: '',
-  longitude: '',
-  image_url: ''
+  name: '', category: null, state: '', city: '',
+  description: '', history: '', latitude: '', longitude: '', image_url: ''
 };
 
-const formRef = ref(null);
 const loading = ref(false);
 const successMessage = ref('');
 const errorMessage = ref('');
+const errors = ref({});
 const form = ref({ ...EMPTY_FORM });
 const locationSearch = ref('');
 const locationSuggestions = ref([]);
 const searchLoading = ref(false);
 const locationMapRef = ref(null);
+const previewFailed = ref(false);
 
 let map = null;
 let marker = null;
+
+const validate = () => {
+  errors.value = {};
+  if (!form.value.name) errors.value.name = 'Place name is required';
+  if (!form.value.category) errors.value.category = 'Category is required';
+  if (!form.value.state) errors.value.state = 'State is required';
+  return Object.keys(errors.value).length === 0;
+};
 
 const initMap = () => {
   if (!locationMapRef.value || map) return;
   if (locationMapRef.value._leaflet_id) locationMapRef.value._leaflet_id = null;
   map = L.map(locationMapRef.value).setView([22.5937, 78.9629], 5);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+    className: 'sp-map-tiles'
   }).addTo(map);
-
   map.on('click', (e) => {
     const { lat, lng } = e.latlng;
     placeMarker(lat, lng);
-    form.value.latitude = parseFloat(lat.toFixed(7));
+    form.value.latitude  = parseFloat(lat.toFixed(7));
     form.value.longitude = parseFloat(lng.toFixed(7));
   });
 };
 
 const placeMarker = (lat, lng) => {
-  if (marker) {
-    marker.setLatLng([lat, lng]);
-  } else {
-    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-    marker.on('dragend', (e) => {
-      const pos = e.target.getLatLng();
-      form.value.latitude = parseFloat(pos.lat.toFixed(7));
-      form.value.longitude = parseFloat(pos.lng.toFixed(7));
-    });
-  }
+  if (marker) { marker.setLatLng([lat, lng]); return; }
+  marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+  marker.on('dragend', (e) => {
+    const pos = e.target.getLatLng();
+    form.value.latitude  = parseFloat(pos.lat.toFixed(7));
+    form.value.longitude = parseFloat(pos.lng.toFixed(7));
+  });
 };
 
 const searchLocation = async (query) => {
-  if (!query || query.length < 3) {
-    locationSuggestions.value = [];
-    return;
-  }
+  if (!query || query.length < 3) { locationSuggestions.value = []; return; }
   searchLoading.value = true;
   try {
-    const response = await fetch(
+    const res = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=in&limit=5`,
       { headers: { 'Accept-Language': 'en' } }
     );
-    const data = await response.json();
-    locationSuggestions.value = data;
+    locationSuggestions.value = await res.json();
   } catch (err) {
     console.error('Location search failed', err);
   } finally {
@@ -274,15 +296,15 @@ const searchLocation = async (query) => {
 
 const debouncedLocationSearch = debounce((val) => searchLocation(val), 400);
 
-const selectSuggestion = (suggestion) => {
-  const lat = parseFloat(suggestion.lat);
-  const lng = parseFloat(suggestion.lon);
+const selectSuggestion = (s) => {
+  const lat = parseFloat(s.lat),
+  lng = parseFloat(s.lon);
   form.value.latitude = parseFloat(lat.toFixed(7));
   form.value.longitude = parseFloat(lng.toFixed(7));
   placeMarker(lat, lng);
   map.setView([lat, lng], 14);
   locationSuggestions.value = [];
-  locationSearch.value = suggestion.display_name;
+  locationSearch.value = s.display_name;
 };
 
 watch([() => form.value.latitude, () => form.value.longitude], ([lat, lng]) => {
@@ -293,13 +315,10 @@ watch([() => form.value.latitude, () => form.value.longitude], ([lat, lng]) => {
 });
 
 const handleSubmit = async () => {
-  const { valid } = await formRef.value.validate();
-  if (!valid) return;
-
+  if (!validate()) return;
   loading.value = true;
   successMessage.value = '';
   errorMessage.value = '';
-
   try {
     await api.post('/places/submit', {
       ...form.value,
@@ -307,25 +326,19 @@ const handleSubmit = async () => {
       longitude: form.value.longitude || null,
       image_url: form.value.image_url || null
     });
-
-    successMessage.value = 'Place submitted successfully! It will appear after admin approval.';
+    successMessage.value = 'Sacred place submitted! It will appear on the map after admin approval.';
     form.value = { ...EMPTY_FORM };
-
-    await nextTick();
-    formRef.value.resetValidation();
-
+    errors.value = {};
     locationSearch.value = '';
     locationSuggestions.value = [];
-
     if (marker) {
       marker.remove();
       marker = null;
     }
     map.setView([22.5937, 78.9629], 5);
-
     setTimeout(() => {
       successMessage.value = '';
-    }, 5000);
+    }, 6000);
   } catch (err) {
     errorMessage.value = err.response?.data?.message || 'Submission failed. Please try again.';
   } finally {
@@ -348,10 +361,263 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.submit-root {
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 40px clamp(20px, 4vw, 60px) 80px;
+.sp-root {
   min-height: 100vh;
+  background: var(--db-bg);
+  background-image: radial-gradient(circle, rgba(200,134,30,0.15) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
+}
+
+.sp-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px clamp(20px, 4vw, 60px) 100px;
+}
+
+.sp-form { margin-top: 0; }
+
+/* Section layout */
+.sp-section {
+  margin-bottom: 48px;
+}
+
+.sp-section-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.sp-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(200,134,30,0.08);
+  border: 1px solid rgba(200,134,30,0.28);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--db-gold-bright);
+  margin-top: 2px;
+}
+
+.sp-section-label { margin: 0 0 4px; }
+.sp-section-hint  { font-size: 0.92rem; color: var(--db-text-muted); margin: 0; line-height: 1.5; }
+
+/* Fields */
+.sp-fields { display: flex; flex-direction: column; gap: 20px; }
+
+.sp-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.sp-field-wrap { display: flex; flex-direction: column; gap: 8px; }
+
+.sp-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--db-text-muted);
+}
+
+.sp-req { color: var(--db-gold); margin-left: 2px; }
+
+.sp-input,
+.sp-textarea {
+  width: 100%;
+  background: var(--db-surface-2);
+  border: 1px solid rgba(200,134,30,0.28);
+  border-radius: 10px;
+  color: var(--db-text);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 13px 16px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  resize: none;
+}
+
+.sp-input:focus,
+.sp-textarea:focus {
+  border-color: rgba(200,134,30,0.6);
+  background: var(--db-surface-3);
+}
+
+.sp-input::placeholder,
+.sp-textarea::placeholder { color: var(--db-text-faint); }
+
+/* Vuetify select — border and bg matched to custom inputs */
+.sp-vselect :deep(.v-field) {
+  background: var(--db-surface-2) !important;
+  border-radius: 10px !important;
+}
+.sp-vselect :deep(.v-field__outline) {
+  --v-field-border-opacity: 1;
+  color: rgba(200,134,30,0.28) !important;
+}
+.sp-vselect :deep(.v-field--focused .v-field__outline) {
+  color: rgba(200,134,30,0.6) !important;
+}
+.sp-vselect :deep(.v-field--focused) { background: var(--db-surface-3) !important; }
+.sp-vselect :deep(input), .sp-vselect :deep(.v-select__selection-text) {
+  color: var(--db-text) !important;
+  font-size: 0.95rem !important;
+  font-family: var(--font-body) !important;
+}
+.sp-vselect :deep(.v-label) { color: var(--db-text-faint) !important; font-size: 0.93rem !important; }
+.sp-vselect :deep(.v-field__append-inner .v-icon) { color: var(--db-text-muted) !important; }
+
+.sp-field-err  { font-size: 0.85rem; color: #F87171; margin: 0; }
+.sp-field-hint { font-size: 0.85rem; color: var(--db-text-faint); margin: 0; }
+
+/* Search */
+.sp-search-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sp-search-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--db-text-muted) !important;
+  pointer-events: none;
+}
+
+.sp-search-input { padding-left: 44px; padding-right: 40px; }
+
+.sp-search-clear {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--db-text-muted);
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+.sp-search-clear:hover { color: var(--db-gold-bright); }
+
+.sp-suggestions {
+  background: var(--db-surface-2);
+  border: 1px solid rgba(200,134,30,0.2);
+  border-radius: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sp-suggestion {
+  display: flex;
+  align-items: flex-start;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(200,134,30,0.08);
+  padding: 11px 14px;
+  color: var(--db-text-muted);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1.4;
+}
+.sp-suggestion:last-child { border-bottom: none; }
+.sp-suggestion:hover { background: rgba(200,134,30,0.06); color: var(--db-text); }
+
+/* Map */
+.sp-map {
+  height: 320px;
+  border-radius: 12px;
+  border: 1px solid rgba(200,134,30,0.2);
+  overflow: hidden;
+  z-index: 0;
+}
+
+:global(.sp-map-tiles) {
+  filter: sepia(25%) brightness(0.78) contrast(1.05) saturate(0.85);
+}
+
+/* Image preview */
+.sp-img-preview {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(200,134,30,0.2);
+  max-height: 260px;
+}
+.sp-img-preview img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+}
+.sp-img-fail {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--db-surface);
+  color: var(--db-text-muted);
+  font-size: 0.9rem;
+}
+
+/* Alerts */
+.sp-alert {
+  display: flex;
+  align-items: flex-start;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+.sp-alert--success {
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.28);
+  color: #4ade80;
+}
+.sp-alert--error {
+  background: rgba(220,64,64,0.08);
+  border: 1px solid rgba(220,64,64,0.28);
+  color: #F87171;
+}
+
+/* Submit */
+.sp-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 0;
+  border-radius: 12px;
+  background: var(--db-gold);
+  border: none;
+  color: var(--db-bg);
+  font-size: 0.82rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  margin-top: 8px;
+}
+.sp-submit:hover:not(:disabled) { background: var(--db-gold-bright); }
+.sp-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .sp-row { grid-template-columns: 1fr; }
+  .sp-section-head { gap: 14px; }
 }
 </style>
