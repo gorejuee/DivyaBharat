@@ -366,6 +366,9 @@ onMounted(() => {
 ================================================================ */
 .ex-header {
   background: var(--db-bg);
+  background-image: radial-gradient(circle, rgba(200,134,30,0.15) 1px, transparent 1px);
+  background-size: 36px 36px;
+  background-attachment: fixed;
   border-bottom: 1px solid var(--db-border);
   padding: 28px 48px 24px;
 }
