@@ -44,6 +44,7 @@ User.associate = (models) => {
     otherKey: 'place_id',
     as: 'visitedPlaces'
   });
+  User.hasMany(models.JournalEntry, { foreignKey: 'user_id', as: 'journalEntries' });
 };
 
 module.exports = User;

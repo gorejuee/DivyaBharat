@@ -177,8 +177,9 @@ const onMouseLeave = () => {
   letter-spacing: 1px;
   text-transform: uppercase;
   color: #4ade80;
-  background: rgba(22,163,74,0.18);
-  border: 1px solid rgba(74,222,128,0.3);
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(74,222,128,0.45);
   padding: 3px 8px;
   border-radius: 4px;
   display: flex;

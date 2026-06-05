@@ -20,6 +20,14 @@ const UserPlace = sequelize.define('UserPlace', {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: DataTypes.NOW
+  },
+  visit_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: true
+  },
+  notes: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 }, {
   tableName: 'user_places',

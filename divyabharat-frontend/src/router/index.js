@@ -13,6 +13,7 @@ import AuthCallback from '@/views/AuthCallback.vue';
 import MapView from '@/views/MapView.vue';
 import MyTrips from '@/views/MyTrips.vue';
 import TripDetail from '@/views/TripDetail.vue';
+import Journal from '@/views/Journal.vue';
 
 const routes = [
   { path: '/', component: Home },
@@ -27,6 +28,7 @@ const routes = [
   { path: '/map', component: MapView },
   { path: '/trips', component: MyTrips, meta: { requiresAuth: true } },
   { path: '/trips/:id', component: TripDetail, meta: { requiresAuth: true } },
+  { path: '/journal', component: Journal, meta: { requiresAuth: true } },
   { path: '/places/:id', component: PlaceDetail },
 ];
 

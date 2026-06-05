@@ -23,6 +23,9 @@
           <router-link v-if="isLoggedIn" to="/trips" class="db-nav-link" active-class="db-nav-link--active">
             Trips
           </router-link>
+          <router-link v-if="isLoggedIn" to="/journal" class="db-nav-link" active-class="db-nav-link--active">
+            Chronicles
+          </router-link>
         </nav>
 
         <!-- Right side -->
@@ -60,6 +63,10 @@
                 <v-icon size="15">mdi-map-marker-path</v-icon>
                 My Trips
               </router-link>
+              <router-link to="/journal" class="db-user-menu-item" @click="menuOpen = false">
+                <v-icon size="15">mdi-feather</v-icon>
+                Chronicles
+              </router-link>
               <div class="db-user-menu-divider" />
               <button class="db-user-menu-item db-user-menu-item--danger" @click="logout">
                 <v-icon size="15">mdi-logout</v-icon>
@@ -90,6 +97,7 @@
             <router-link to="/map" class="db-mobile-link" @click="mobileOpen = false">Map</router-link>
             <router-link v-if="isLoggedIn" to="/trips" class="db-mobile-link" @click="mobileOpen = false">My Trips</router-link>
             <router-link v-if="isLoggedIn" to="/my-places" class="db-mobile-link" @click="mobileOpen = false">My Places</router-link>
+            <router-link v-if="isLoggedIn" to="/journal" class="db-mobile-link" @click="mobileOpen = false">Chronicles</router-link>
             <router-link v-if="isLoggedIn" to="/places/submit" class="db-mobile-link" @click="mobileOpen = false">Submit a Place</router-link>
             <router-link v-if="userStore.isAdmin" to="/admin/places" class="db-mobile-link" @click="mobileOpen = false">Admin</router-link>
           </nav>

@@ -258,6 +258,40 @@
         </main>
       </div>
     </template>
+
+    <!-- Unvisit confirmation dialog -->
+    <v-dialog v-model="unvisitDialog" max-width="420">
+      <div class="pd-confirm-dialog">
+        <div class="pd-confirm-hd">
+          <div class="pd-confirm-icon">
+            <v-icon size="18" style="color:#F87171;">mdi-alert-outline</v-icon>
+          </div>
+          <div>
+            <h2 class="pd-confirm-title font-display">Remove from visited?</h2>
+            <p class="pd-confirm-sub font-label">This cannot be undone</p>
+          </div>
+        </div>
+        <div class="pd-confirm-body">
+          <p class="pd-confirm-text font-body">
+            Any visit date and notes you've saved for
+            <strong style="color:var(--db-text);">{{ place?.name }}</strong>
+            will be permanently deleted along with your visited record.
+          </p>
+          <router-link to="/my-places" class="pd-confirm-link font-label" @click="unvisitDialog = false">
+            <v-icon size="12" style="margin-right:4px;">mdi-heart-outline</v-icon>
+            View your notes before removing
+          </router-link>
+        </div>
+        <div class="pd-confirm-ft">
+          <button class="pd-confirm-cancel font-label" @click="unvisitDialog = false">Cancel</button>
+          <button class="pd-confirm-del font-label" :disabled="visitLoading" @click="confirmUnvisit">
+            <v-progress-circular v-if="visitLoading" indeterminate size="13" width="2" color="white" style="margin-right:6px;" />
+            Remove
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
   </div>
 </template>
 
@@ -276,18 +310,19 @@ const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
 
-const place       = ref(null);
-const loading     = ref(false);
-const aiLoading   = ref(false);
-const visitLoading= ref(false);
+const place = ref(null);
+const loading = ref(false);
+const aiLoading = ref(false);
+const visitLoading = ref(false);
+const unvisitDialog = ref(false);
 const currentQuestion = ref('');
 const chatHistory = ref([]);
 const chatContainer = ref(null);
-const imgFailed   = ref(false);
+const imgFailed = ref(false);
 const activeSection = ref('about');
 
 const isLoggedIn = computed(() => !!userStore.token);
-const isVisited  = computed(() => place.value ? userStore.isVisited(place.value.id) : false);
+const isVisited = computed(() => place.value ? userStore.isVisited(place.value.id) : false);
 
 const visibleSections = computed(() => {
   if (!place.value) return [];
@@ -327,17 +362,33 @@ const fetchVisitedIds = async () => {
   } catch { /* silent */ }
 };
 
-const toggleVisited = async () => {
+const toggleVisited = () => {
+  if (!place.value) return;
+  if (isVisited.value) {
+    unvisitDialog.value = true;
+  } else {
+    markVisited();
+  }
+};
+
+const markVisited = async () => {
   if (!place.value) return;
   visitLoading.value = true;
   try {
-    if (isVisited.value) {
-      await api.delete(`/visits/${place.value.id}`);
-      userStore.removeVisitedPlaceId(place.value.id);
-    } else {
-      await api.post('/visits', { placeId: place.value.id });
-      userStore.addVisitedPlaceId(place.value.id);
-    }
+    await api.post('/visits', { placeId: place.value.id });
+    userStore.addVisitedPlaceId(place.value.id);
+  } catch { /* silent */ } finally {
+    visitLoading.value = false;
+  }
+};
+
+const confirmUnvisit = async () => {
+  if (!place.value) return;
+  visitLoading.value = true;
+  try {
+    await api.delete(`/visits/${place.value.id}`);
+    userStore.removeVisitedPlaceId(place.value.id);
+    unvisitDialog.value = false;
   } catch { /* silent */ } finally {
     visitLoading.value = false;
   }
@@ -385,7 +436,7 @@ const scrollToSection = (id) => {
 
 /* ── Observers ── */
 
-let revealObserver   = null;
+let revealObserver = null;
 let scrollSpyHandler = null;
 
 const initScrollSpy = () => {
@@ -528,7 +579,7 @@ onUnmounted(() => {
 }
 @keyframes pdKenBurns {
   from { transform: scale(1.0) translate(0, 0); }
-  to   { transform: scale(1.09) translate(-1%, -0.8%); }
+  to { transform: scale(1.09) translate(-1%, -0.8%); }
 }
 .pd-hero-placeholder {
   position: absolute;
@@ -645,7 +696,7 @@ onUnmounted(() => {
 }
 @keyframes pdArrowBob {
   0%, 100% { transform: translateY(0); opacity: 0.65; }
-  50%       { transform: translateY(9px); opacity: 1; }
+  50% { transform: translateY(9px); opacity: 1; }
 }
 
 /* ── Page body layout ── */
@@ -1016,7 +1067,7 @@ onUnmounted(() => {
 .pd-ai-dots span:nth-child(3) { animation-delay: 0.4s; }
 @keyframes pdDot {
   0%, 80%, 100% { transform: scale(0.6); opacity: 0.22; }
-  40%           { transform: scale(1);   opacity: 0.75; }
+  40% { transform: scale(1); opacity: 0.75; }
 }
 
 .pd-chat-input-row {
@@ -1056,4 +1107,73 @@ onUnmounted(() => {
   .pd-hero-content { padding: 0 24px; bottom: 64px; }
   .pd-back { top: 20px; left: 16px; }
 }
+
+/* ── Unvisit confirmation dialog ── */
+.pd-confirm-dialog {
+  background: var(--db-surface);
+  border: 1px solid var(--db-border-strong);
+  border-radius: 18px;
+  overflow: hidden;
+}
+.pd-confirm-hd {
+  display: flex; align-items: center; gap: 14px;
+  padding: 20px 24px 16px;
+  background: var(--db-surface-2);
+  border-bottom: 1px solid var(--db-border);
+}
+.pd-confirm-icon {
+  width: 38px; height: 38px; flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(220,64,64,0.1);
+  border: 1px solid rgba(220,64,64,0.28);
+  display: flex; align-items: center; justify-content: center;
+}
+.pd-confirm-title { font-size: 1.2rem; color: var(--db-text); margin: 0 0 3px; }
+.pd-confirm-sub {
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: #F87171; margin: 0;
+}
+.pd-confirm-body {
+  padding: 20px 24px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.pd-confirm-text {
+  font-size: 0.93rem;
+  color: var(--db-text-muted);
+  line-height: 1.6; margin: 0;
+}
+.pd-confirm-link {
+  display: inline-flex; align-items: center;
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--db-gold);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.pd-confirm-link:hover { color: var(--db-gold-bright); }
+
+.pd-confirm-ft {
+  display: flex; justify-content: flex-end; gap: 10px;
+  padding: 14px 24px 20px;
+}
+.pd-confirm-cancel {
+  background: none; border: 1px solid var(--db-border);
+  border-radius: 9px; color: var(--db-text-muted);
+  font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 9px 18px; cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.pd-confirm-cancel:hover { border-color: var(--db-border-strong); color: var(--db-text); }
+.pd-confirm-del {
+  display: inline-flex; align-items: center;
+  background: rgba(220,64,64,0.14); border: 1px solid rgba(220,64,64,0.32);
+  border-radius: 9px; color: #F87171;
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 9px 20px; cursor: pointer; transition: background 0.2s;
+}
+.pd-confirm-del:hover:not(:disabled) { background: rgba(220,64,64,0.24); }
+.pd-confirm-del:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>

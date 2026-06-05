@@ -14,6 +14,7 @@ const aiRoutes = require('@server/routes/ai');
 const visitsRoutes = require('@server/routes/visits');
 const adminRoutes = require('@server/routes/admin');
 const tripsRoutes = require('@server/routes/trips');
+const journalRoutes = require('@server/routes/journal');
 const { startWikidataSync } = require('@server/jobs/wikidataSync');
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/visits', visitsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/trips', tripsRoutes);
+app.use('/api/journal', journalRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' })

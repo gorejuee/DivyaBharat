@@ -1,4 +1,4 @@
-const { User, Place } = require('@server/db');
+const { User, Place, UserPlace } = require('@server/db');
 
 const markVisited = async (req, res) => {
   try {
@@ -76,9 +76,9 @@ const getVisitedPlaces = async (req, res) => {
         association: 'visitedPlaces',
         attributes: [
           'id', 'name', 'category', 'state',
-          'city', 'image_url', 'latitude', 'longitude'
+          'city', 'image_url', 'latitude', 'longitude', 'description'
         ],
-        through: { attributes: ['visited_at'] }
+        through: { attributes: ['visited_at', 'visit_date', 'notes'] }
       }]
     });
 
@@ -117,4 +117,26 @@ const getVisitedPlaceIds = async (req, res) => {
   }
 };
 
-module.exports = { markVisited, unmarkVisited, getVisitedPlaces, getVisitedPlaceIds };
+const updateVisit = async (req, res) => {
+  try {
+    const { placeId } = req.params;
+    const { notes, visit_date } = req.body;
+
+    const record = await UserPlace.findOne({
+      where: { user_id: req.user.id, place_id: placeId }
+    });
+
+    if (!record) return res.status(404).json({ message: 'Visit record not found.' });
+
+    await record.update({
+      notes: notes !== undefined ? (notes?.trim() || null) : record.notes,
+      visit_date: visit_date !== undefined ? (visit_date || null) : record.visit_date
+    });
+
+    res.json({ message: 'Visit updated.', record });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+module.exports = { markVisited, unmarkVisited, getVisitedPlaces, getVisitedPlaceIds, updateVisit };
