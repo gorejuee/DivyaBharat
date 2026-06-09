@@ -4,6 +4,16 @@ An AI-powered Indian spiritual and heritage travel companion. DivyaBharat helps 
 
 ---
 
+## Live Demo
+
+| | Link |
+|---|---|
+| Frontend | [divya-bharat.vercel.app](https://divya-bharat.vercel.app/) |
+| Backend API | [divyabharat-backend.onrender.com](https://divyabharat-backend.onrender.com) |
+
+>
+---
+
 ## Features
 
 - **Explore Places** - Browse and search 6000+ real heritage sites across India with category, region, and full-text search filters
@@ -71,6 +81,10 @@ The homepage is built as a series of full-screen portal sections that switch on 
 | Technology | Purpose |
 |---|---|
 | Docker + docker-compose | Containerized backend and database |
+| Vercel | Frontend hosting and deployment |
+| Render | Backend API hosting |
+| Supabase | Hosted PostgreSQL database |
+| UptimeRobot | Uptime monitoring to keep backend warm |
 | OpenStreetMap + Nominatim | Free geocoding for place submission map picker |
 | Wikidata SPARQL API | Source of Indian heritage place data |
 | Wikipedia REST API | Contextual summaries for AI guide |
