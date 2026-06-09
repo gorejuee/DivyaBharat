@@ -13,8 +13,8 @@
               <span class="lw"><span class="li">DivyaBharat</span></span>
             </h1>
             <p class="fp-desc font-body">
-              Temples, forts, caves, ghats and sacred landscapes across India.
-              Rich history and AI-powered guidance.
+              Every sacred site in India holds a story.
+              Explore temples, ghats, forts, caves and ancient heritage, guided by history and AI.
             </p>
             <div class="hero-actions">
               <router-link to="/places" class="db-btn db-btn--gold">Explore Places</router-link>
@@ -143,36 +143,96 @@
       </div>
     </section>
 
-    <!-- FEATURED PLACES -->
-    <section class="featured-section" v-if="featuredPlaces.length">
+    <!-- FEATURED PLACES - Globe -->
+    <section class="featured-section" v-if="globePlaces.length || featuredPlaces.length">
       <div class="section-head">
         <MandalaLine />
         <h2 class="section-title font-display">Places Worth Discovering</h2>
+        <p class="feat-sub font-body">Rotate the globe to explore sacred sites across India.</p>
       </div>
-      <p class="feat-sub font-body">Sacred sites, ancient forts and living heritage across India.</p>
 
-      <div class="feat-grid">
-        <div
-          v-for="place in featuredPlaces.slice(0, 3)"
-          :key="place.id"
-          class="feat-card"
-          @click="router.push(`/places/${place.id}`)"
-        >
-          <img :src="place.image_url" :alt="place.name" class="feat-img" />
-          <div class="feat-gradient" />
-          <div class="feat-body">
-            <p class="feat-state font-label">{{ place.state }}</p>
-            <h3 class="feat-name font-display">{{ place.name }}</h3>
-            <p class="feat-desc font-body" v-if="place.description">
-              {{ (place.description.charAt(0).toUpperCase() + place.description.slice(1)).slice(0, 90) }}...
-            </p>
-            <span class="feat-cta font-label">Explore &rarr;</span>
-          </div>
+      <div class="globe-layout">
+
+        <div class="globe-col">
+          <SacredGlobe
+            :places="globePlaces.length ? globePlaces : featuredPlaces"
+            @hover="place => activePlace = place"
+          />
         </div>
+
+        <div class="globe-panel-col">
+          <Transition name="place-fade" mode="out-in">
+            <div
+              v-if="activePlace"
+              :key="activePlace.id"
+              class="globe-panel"
+              @click="router.push(`/places/${activePlace.id}`)"
+            >
+              <div class="gp-img-wrap" v-if="activePlace.image_url">
+                <img :src="activePlace.image_url" :alt="activePlace.name" class="gp-img" />
+                <div class="gp-img-overlay" />
+              </div>
+              <div class="gp-body">
+                <div class="gp-meta font-label">
+                  <span class="gp-state">{{ activePlace.state }}</span>
+                  <span class="gp-dot" v-if="activePlace.category">·</span>
+                  <span class="gp-cat" v-if="activePlace.category">{{ activePlace.category.replace('_', ' ') }}</span>
+                </div>
+                <h3 class="gp-name font-display">{{ activePlace.name }}</h3>
+                <p class="gp-desc font-body" v-if="activePlace.description">
+                  {{ activePlace.description.slice(0, 110) }}{{ activePlace.description.length > 110 ? '...' : '' }}
+                </p>
+                <span class="gp-cta font-label">Explore &rarr;</span>
+              </div>
+            </div>
+            <div v-else class="globe-panel globe-panel--empty">
+              <p class="font-body" style="color:var(--db-text-muted);font-size:0.9rem;">
+                Hover a point on the globe to discover a place.
+              </p>
+            </div>
+          </Transition>
+        </div>
+
       </div>
 
       <div class="feat-footer">
         <router-link to="/places" class="db-btn db-btn--ghost">View all places</router-link>
+      </div>
+    </section>
+
+    <!-- CHRONICLES CTA -->
+    <section class="chronicles-cta">
+      <div class="chronicles-inner">
+
+        <div class="chronicles-text">
+          <span class="chronicles-eyebrow font-label">Smriti · Chronicles</span>
+          <h2 class="section-title font-display" style="margin-top:10px;">Chronicle Your Yatra</h2>
+          <p class="chronicles-sub font-body">
+            Write about the sacred places you have walked. The moments that moved you,
+            the silence you found. A living record of your personal pilgrimage.
+          </p>
+          <router-link to="/journal" class="db-btn db-btn--gold" style="margin-top:28px;">
+            <v-icon size="14" style="margin-right:7px;">mdi-feather</v-icon>
+            Start Writing
+          </router-link>
+        </div>
+
+        <div class="chronicles-card-wrap">
+          <div class="chronicles-card">
+            <div class="cc-header">
+              <div class="cc-header-left">
+                <span class="cc-date font-label">June 4, 2025</span>
+                <span class="cc-place font-label">· Varanasi</span>
+              </div>
+              <v-icon size="15" style="color:var(--db-gold);opacity:0.6;">mdi-feather</v-icon>
+            </div>
+            <div class="cc-divider" />
+            <div class="cc-body font-body">
+              <span class="cc-text">{{ chroniclesText }}</span><span class="cc-cursor">|</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -213,11 +273,36 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/services/api';
 import MandalaLine from '@/components/MandalaLine.vue';
+import SacredGlobe from '@/components/SacredGlobe.vue';
 
 const router = useRouter();
 const featuredPlaces = ref([]);
+const globePlaces    = ref([]);
+const activePlace    = ref(null);
 const activePortalIdx = ref(0);
 
+// Chronicles typewriter
+const SAMPLE = "Stood at the Dasaswamedh Ghat as the evening aarti began. The flames, the chanting, the river reflecting a thousand lamps. Some places do not just exist in space. They exist in time. In this moment I understood why people have been walking to Kashi for three thousand years.";
+const chroniclesText = ref('');
+let twInterval = null;
+let twTimeout  = null;
+let twObserver = null;
+
+const startTypewriter = () => {
+  if (twInterval) clearInterval(twInterval);
+  if (twTimeout)  clearTimeout(twTimeout);
+  chroniclesText.value = '';
+  let i = 0;
+  twInterval = setInterval(() => {
+    if (i < SAMPLE.length) {
+      chroniclesText.value += SAMPLE[i++];
+    } else {
+      clearInterval(twInterval);
+      twInterval = null;
+      twTimeout = setTimeout(startTypewriter, 2200);
+    }
+  }, 55);
+};
 
 const stats = [
   { value: '6000+', label: 'Heritage Sites' },
@@ -251,7 +336,6 @@ const imageLoads = (url) => new Promise(resolve => {
 const fetchFeatured = async () => {
   try {
     let candidates = [];
-
     try {
       const res = await api.get('/places/featured');
       candidates = (res.data.places || []).filter(p => p.image_url && p.image_url.trim());
@@ -271,21 +355,32 @@ const fetchFeatured = async () => {
     );
 
     featuredPlaces.value = results.filter(Boolean).slice(0, 3);
+    if (featuredPlaces.value.length && !activePlace.value) {
+      activePlace.value = featuredPlaces.value[0];
+    }
   } catch { /* silent */ }
 };
 
-const handleScroll = () => {
-  updatePortals();
+const fetchGlobePlaces = async () => {
+  try {
+    const res = await api.get('/places', { params: { limit: 300, page: 1 } });
+    const all = (res.data.places || []).filter(
+      p => p.latitude != null && p.longitude != null &&
+           p.image_url && p.image_url.trim()
+    );
+    globePlaces.value = all;
+    if (all.length && !activePlace.value) activePlace.value = all[0];
+  } catch { /* silent */ }
 };
+
+const handleScroll = () => { updatePortals(); };
 
 const scrollPortalForward = () => {
   const portalsCount = document.querySelectorAll('.full-portal').length;
   if (activePortalIdx.value >= portalsCount - 1) {
-    // Last portal - jump past the entire portals section
     const wrap = document.querySelector('.portals-wrap');
     if (wrap) window.scrollTo({ top: wrap.offsetTop + wrap.offsetHeight, behavior: 'smooth' });
   } else {
-    // Each portal = one viewport height of scroll distance
     window.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
   }
 };
@@ -293,38 +388,45 @@ const scrollPortalForward = () => {
 const updatePortals = () => {
   const wrap = document.querySelector('.portals-wrap');
   if (!wrap) return;
-
   const rect = wrap.getBoundingClientRect();
   const vh = window.innerHeight;
   const scrollable = wrap.offsetHeight - vh;
   if (scrollable <= 0) return;
-
   const scrolled = Math.max(0, -rect.top);
   const progress = Math.min(1, scrolled / scrollable);
-
   const portals = document.querySelectorAll('.full-portal');
   const activeIdx = Math.min(portals.length - 1, Math.floor(progress * portals.length));
-
   portals.forEach((el, i) => {
     const isActive = i === activeIdx;
     el.classList.toggle('visible', isActive);
-    if (isActive && !el.classList.contains('active')) {
-      el.classList.add('active');
-    }
+    if (isActive && !el.classList.contains('active')) el.classList.add('active');
   });
   activePortalIdx.value = activeIdx;
 };
 
 onMounted(() => {
   fetchFeatured();
+  fetchGlobePlaces();
   window.addEventListener('scroll', handleScroll, { passive: true });
-
   const first = document.querySelector('.full-portal');
   if (first) first.classList.add('active', 'visible');
+
+  // Chronicles typewriter - trigger when section scrolls into view
+  const section = document.querySelector('.chronicles-cta');
+  if (section) {
+    twObserver = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { startTypewriter(); twObserver.disconnect(); } },
+      { threshold: 0.25 }
+    );
+    twObserver.observe(section);
+  }
 });
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
+  if (twInterval) clearInterval(twInterval);
+  if (twTimeout)  clearTimeout(twTimeout);
+  if (twObserver) twObserver.disconnect();
 });
 </script>
 
@@ -768,7 +870,7 @@ onUnmounted(() => {
 .ribbon-pill:hover .pill-label { color: var(--db-text); }
 
 /* ================================================================
-   FEATURED PLACES
+   FEATURED PLACES - Globe layout
 ================================================================ */
 .featured-section {
   padding: 72px 0 80px;
@@ -779,22 +881,38 @@ onUnmounted(() => {
   font-size: 1rem;
   color: var(--db-text-muted);
   line-height: 1.7;
-  margin: -18px 0 40px;
+  margin: -10px 0 44px;
   padding: 0 24px;
 }
 
-.feat-grid {
+/* Two-column: globe left, panel right */
+.globe-layout {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  padding: 0 32px;
-  max-width: 1280px;
+  grid-template-columns: 1fr 420px;
+  gap: 0;
+  align-items: center;
+  max-width: 1160px;
   margin: 0 auto;
+  padding: 0 32px;
 }
 
-.feat-card {
+.globe-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px 0 0;
+}
+
+/* Place info panel */
+.globe-panel-col {
+  display: flex;
+  align-items: stretch;
+}
+
+.globe-panel {
+  width: 100%;
+  min-height: 440px;
   position: relative;
-  height: 460px;
   overflow: hidden;
   cursor: pointer;
   border-radius: 12px;
@@ -802,23 +920,32 @@ onUnmounted(() => {
   box-shadow: 0 0 0 1px rgba(200,134,30,0.15), 0 8px 32px rgba(0,0,0,0.3);
   transition: translate 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
 }
-.feat-card:hover {
-  translate: 0 -8px;
+.globe-panel:hover {
+  translate: 0 -6px;
   box-shadow: 0 0 0 1px rgba(200,134,30,0.55), 0 24px 56px rgba(0,0,0,0.55);
 }
-.feat-card:hover .feat-img { transform: scale(1.08); }
-.feat-card:hover .feat-cta { opacity: 1; transform: translateY(0); }
+.globe-panel:hover .gp-img { transform: scale(1.08); }
+.globe-panel:hover .gp-cta { opacity: 1; transform: translateY(0); }
 
-.feat-img {
+.globe-panel--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+.globe-panel--empty:hover { translate: none; box-shadow: 0 0 0 1px rgba(200,134,30,0.15), 0 8px 32px rgba(0,0,0,0.3); }
+
+.gp-img-wrap {
   position: absolute;
   inset: 0;
+}
+.gp-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.65s var(--ease-out);
 }
-
-.feat-gradient {
+.gp-img-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
@@ -830,13 +957,16 @@ onUnmounted(() => {
   );
 }
 
-.feat-body {
+.gp-body {
   position: absolute;
   bottom: 0; left: 0; right: 0;
   padding: 0 26px 28px;
 }
 
-.feat-state {
+.gp-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 3px;
@@ -844,8 +974,9 @@ onUnmounted(() => {
   color: var(--db-gold);
   margin-bottom: 7px;
 }
+.gp-dot { color: rgba(200,134,30,0.4); }
 
-.feat-name {
+.gp-name {
   font-size: 1.65rem;
   font-weight: 600;
   color: var(--db-text);
@@ -853,14 +984,14 @@ onUnmounted(() => {
   margin-bottom: 10px;
 }
 
-.feat-desc {
+.gp-desc {
   font-size: 0.84rem;
   color: rgba(237,227,206,0.75);
   line-height: 1.65;
   margin-bottom: 14px;
 }
 
-.feat-cta {
+.gp-cta {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -874,10 +1005,131 @@ onUnmounted(() => {
   transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out);
 }
 
+/* Panel transition */
+.place-fade-enter-active,
+.place-fade-leave-active { transition: opacity 0.3s, transform 0.3s; }
+.place-fade-enter-from { opacity: 0; transform: translateY(10px); }
+.place-fade-leave-to   { opacity: 0; transform: translateY(-6px); }
+
 .feat-footer {
   text-align: center;
-  margin-top: 40px;
+  margin-top: 48px;
 }
+
+/* ================================================================
+   CHRONICLES CTA - split layout with journal card
+================================================================ */
+.chronicles-cta {
+  padding: 90px 48px;
+  background: var(--db-surface);
+  border-top: 1px solid var(--db-border);
+  border-bottom: 1px solid var(--db-border);
+  position: relative;
+  overflow: hidden;
+}
+.chronicles-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(200,134,30,0.055) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.chronicles-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: center;
+  position: relative;
+}
+
+/* Left: text */
+.chronicles-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.chronicles-eyebrow {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 4.5px;
+  text-transform: uppercase;
+  color: var(--db-gold);
+}
+.chronicles-sub {
+  font-size: 1rem;
+  color: var(--db-text-muted);
+  line-height: 1.78;
+  margin-top: 12px;
+  max-width: 420px;
+}
+
+/* Right: animated journal card */
+.chronicles-card-wrap {
+  perspective: 900px;
+}
+.chronicles-card {
+  background: var(--db-surface-2);
+  border: 1px solid rgba(200,134,30,0.22);
+  border-left: 3px solid rgba(200,134,30,0.45);
+  border-radius: 10px;
+  padding: 26px 28px 28px;
+  transform: rotateY(-4deg) rotateX(2deg);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(200,134,30,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+  transition: transform 0.4s var(--ease-out);
+}
+.chronicles-card-wrap:hover .chronicles-card {
+  transform: rotateY(0deg) rotateX(0deg);
+}
+
+.cc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.cc-header-left { display: flex; align-items: center; gap: 6px; }
+.cc-date {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--db-gold);
+}
+.cc-place {
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(237,227,206,0.45);
+}
+
+.cc-divider {
+  height: 1px;
+  background: linear-gradient(to right, rgba(200,134,30,0.3), transparent);
+  margin-bottom: 16px;
+}
+
+.cc-body {
+  font-size: 0.92rem;
+  color: rgba(237,227,206,0.72);
+  line-height: 1.82;
+  min-height: 140px;
+}
+
+.cc-cursor {
+  display: inline-block;
+  color: var(--db-gold);
+  font-weight: 300;
+  animation: cc-blink 1s step-end infinite;
+  margin-left: 1px;
+}
+@keyframes cc-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
 /* ================================================================
    SUBMIT CTA
@@ -935,8 +1187,20 @@ onUnmounted(() => {
 /* ================================================================
    RESPONSIVE
 ================================================================ */
+@media (max-width: 1024px) {
+  .globe-layout { grid-template-columns: 1fr 340px; }
+  .chronicles-inner { gap: 48px; }
+}
+
 @media (max-width: 900px) {
-  .feat-grid { grid-template-columns: repeat(2, 1fr); }
+  .globe-layout { grid-template-columns: 1fr; }
+  .globe-col { padding: 0; }
+  .globe-panel-col { min-height: auto; }
+  .chronicles-inner { grid-template-columns: 1fr; gap: 40px; }
+  .chronicles-text { align-items: center; text-align: center; }
+  .chronicles-sub { max-width: 100%; }
+  .chronicles-card { transform: none; }
+  .chronicles-cta { padding: 64px 24px; }
 }
 
 @media (max-width: 768px) {
@@ -944,9 +1208,7 @@ onUnmounted(() => {
   .fp-content--right { text-align: left; margin-left: 0; }
   .fp-content--right .fp-desc { margin-left: 0; }
   .fp-title { font-size: clamp(2.6rem, 10vw, 3.5rem); }
-  .fp-content--hero { padding: 0 24px; }
-  .fp-hero .fp-title { font-size: clamp(3rem, 12vw, 5rem); }
-  .feat-grid { grid-template-columns: 1fr; padding: 0 16px; }
-  .feat-card { height: 320px; }
+  .fp-content--hero { padding: 0 20px 12vh; }
+  .globe-layout { padding: 0 16px; }
 }
 </style>
