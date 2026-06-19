@@ -9,7 +9,7 @@ An AI-powered Indian spiritual and heritage travel companion. DivyaBharat helps 
 | | Link |
 |---|---|
 | Frontend | [divya-bharat.vercel.app](https://divya-bharat.vercel.app/) |
-| Backend API | [divyabharat-backend.onrender.com](https://divyabharat-backend.onrender.com) |
+| Backend API | [divyabharat-backend-kme7.onrender.com](https://divyabharat-backend-kme7.onrender.com/api/health) |
 
 >
 ---
